@@ -1,0 +1,1534 @@
+﻿*{
+    margin: 0;
+    padding: 0;
+}
+html,body{
+    width: 100%;
+    height: 100%;
+}
+ol, ul {
+    list-style: none !important;
+}
+.content{
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #067af4;
+    background: #FFF;
+}
+.content form{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.content form #loopbanners,
+.content form #divLogin{
+    position: relative;
+    display: flex;
+    flex: 1;
+    margin-top: -72px;
+}
+.content form #loopbanners{
+    justify-content: flex-end;
+}
+.content form #divLogin{
+    justify-content: flex-start;
+    margin-top: -48px;
+}
+.content form #loopbanners #divBarTitle{
+    display: inline-block;
+    position: absolute;
+    top: 87.33%;
+    left: 58%;
+    width: 108px;
+}
+.content form #loopbanners #divBarTitle > .barItems > li {
+    display: inline-block;
+    width: 11px;
+    height: 11px;
+    margin: 1px;
+    text-indent: -999px;
+    border: 1px solid #b2c2c5;
+    border-radius: 10px;
+    cursor: pointer;
+    background-color: #b2c2c5;
+    opacity: .5;
+    margin-left: 10px;
+}
+.content form #loopbanners #divBarTitle > .barItems > .barItemActive {
+    width: 10px;
+    height: 10px;
+    background-color: #fff;
+    border-color: #fff;
+    opacity: 1;
+}
+.content form #loopbanners #divImgBg{
+    display: flex;
+    width: 700px;
+    height: 623px;
+    align-items: center;
+    justify-content: center;
+}
+.content form #loopbanners #divImgBg img{
+    display: block;
+    opacity: 1;
+    height: auto;
+    width: 100%;
+    -webkit-backface-visibility: hidden;
+}
+.content form #divLogin #loginContainer{
+}
+.content form #divLogin #loginContainer #divTitle{
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+}
+.content form #divLogin #loginContainer #divTitle .loginKDLogo{
+    background-repeat: no-repeat;
+    display: block;
+    height: 64px;
+    width: 210px;
+} 
+.content form #divLogin #loginContainer #dbox {
+    min-height: 410px;
+    width: 470px;
+    background: #FFFFFF;
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+}
+.content form #divLogin #loginContainer #dbox > .boxtitles {
+    border-bottom: 1px solid #e6e6e6;
+    padding: 10px 0% 0 0%;
+    text-align: center;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.content form #divLogin #loginContainer #dbox > .boxtitles .boxtitle{
+    display: inline-block;
+    padding: 0 0%;
+    color: #828282;
+    font-size: 14px;
+}
+
+.content form #divLogin #loginContainer #dbox > .boxtitles .boxtitle[data-type="account"]{
+    padding-left:40px;
+}
+
+.content form #divLogin #loginContainer #dbox > .boxtitles .boxtitle:first-child{
+     padding-left:0px;
+}
+
+.content form #divLogin #loginContainer #dbox > .boxtitles .boxtitle span{
+    display: block;
+    padding: 10px 0;
+    letter-spacing: 1px;
+}
+.content form #divLogin #loginContainer #dbox > .boxtitles .boxtitle span{
+     border-bottom: 3px solid transparent;
+}
+.content form #divLogin #loginContainer #dbox > .boxtitles .boxtitle.active span{
+    border-bottom: 3px solid #1B93EB;
+    color: #1B93EB;
+}
+.content form #divLogin #loginContainer #dbox > #boxcontainer{
+    width: 940px;
+    position: relative;
+    /*  Webkit内核浏览器：Safari and Chrome*/
+    -webkit-transition-property: all;
+    -webkit-transition-duration: .5s;
+    -webkit-transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
+    /*  Mozilla内核浏览器：firefox3.5+*/
+    -moz-transition-property: all;
+    -moz-transition-duration: .5s;
+    -moz-transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
+    /*  Opera*/
+    -o-transition-property: all;
+    -o-transition-duration: .5s;
+    -o-transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
+    /*  IE9*/
+    -ms-transition-property: all;
+    -ms-transition-duration: .5s;
+    -ms-transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
+}
+.footer{
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    text-align: center;
+    background: #fff;
+    padding: 16px 0;
+}
+.footer #pBrowerVersion {
+    height: 19px;
+}
+
+.footer #pBrowerVersion > #indexDLChrome {
+    cursor: hand;
+    color: #74808F;
+}
+
+.footer #pBrowerVersion > #indexClearCache {
+    font-size: 14px;
+    color: #41AAFF;
+    letter-spacing: 1px;
+    cursor: hand;
+}
+    .footer #divServiceContactAndPrivacyPolicy #linkServiceContact, #linkPrivacyPolicy {
+        cursor: pointer;
+        color: rgba(179,187,209,1);
+    }
+        .footer #divServiceContactAndPrivacyPolicy #linkServiceContact:hover, #linkPrivacyPolicy:hover {
+            color: rgba(35,134,238,1);
+        }
+    .footer #divICPNo #linkSiteRecordNop, #linkSiteRecordNoe {
+        cursor: pointer;
+        color: rgba(179,187,209,1);
+    }
+        .footer #divICPNo #linkSiteRecordNop:hover, #linkSiteRecordNoe:hover {
+            color: rgba(35,134,238,1);
+        }
+    .footer #divICPNo #linkSiteRecordNoe {
+        margin-left:10px;
+    }
+    .footer #divICPNo #img_ICPIcon {
+        display: inline-block;
+        width: 22px;
+        height: 20px;
+        float: left;
+        background-position: -87px -949px;
+        margin-right: 3px;
+    }
+    .footer #divICPNo .ICP_SapnLabel {
+        display: inline-block;
+    }
+.footer #pCopyRight {
+    margin-top: 17px;
+    height: 19px;
+}
+@media screen and (max-width: 1920px) and (min-width: 1600px){
+    .content form #divLogin{
+        margin-top: -100px;
+    }
+}
+@media screen and (max-width: 1600px) and (min-width: 1440px){
+    .content form #loopbanners #divBarTitle{
+        left: 50%;
+    }
+}
+@media screen and (max-width: 1440px) and (min-width: 1280px){
+    .content form #loopbanners #divBarTitle{
+        left: 44.33%;
+    }
+}
+@media screen and (max-width: 1280px) and (min-width: 1150px){
+    .content form #loopbanners #divBarTitle{
+        top: 88.33%;
+        left: 43.33%;
+    }
+}
+@media screen and (max-width: 1150px){
+    .content form #loopbanners{
+        display: none;
+    }
+    .content form #divLogin{
+        justify-content: center;
+    }
+    
+}
+
+.content #qrCodeDiv > #divQRCodeTitle {
+    height: 71px;
+    text-align: center;
+}
+    .content #qrCodeDiv > #divQRCodeTitle > .loginKDLogo {
+       /*background-size: 100%;*/
+        background-repeat: no-repeat;
+        display: inline-block;
+        margin: -15px 0 0 0px;
+        height: 64px;
+        width: 210px;
+    }
+
+.kdlogin{
+    /*display: none;*/
+    display: inline-block;
+    min-height: 270px;
+    padding-bottom: 20px;
+    width: 470px;
+}
+
+.kdlogin > #loginDBInfo {
+    display: flex;
+    flex-direction: row-reverse;
+    padding-top: 20px;
+    width: 100%;
+    height: 46px;
+    position: relative;
+}
+
+#loginDBInfo .k-input {
+    font-size: 14px;
+    color: #727E8D;
+    letter-spacing: 1px;
+    line-height: 20px;
+}
+
+#loginDBInfo .k-i-arrow-60-down,#loginDBInfo .k-i-arrow-s {
+    background-position: -106px -1370px;
+    /* margin-top: 4px; */
+}
+.k-i-arrow-s:before,
+.k-i-arrow-60-down:before {
+  content: "";
+}
+#loginDBInfo .k-i-right {
+    background-position: 3px -414px;
+}
+#loginDBInfo .k-i-wrong {
+    background-position: -105px -1416px;
+}
+
+#loginDBInfo .k-icon {
+    width: 20px;
+    background-image: url(images/kd_icon.png);
+}
+
+.kdlogin > #loginUserInfo {
+    padding-left: 80px;
+    height: auto;
+    width: 310px;
+}
+
+.kdlogin .kd-notborder, .kdlogin .kd-notborder:hover, .kdlogin .kd-notborder:active, .kdlogin .kd-notborder:focus {
+    background-color: #fff !important;
+    border: none !important;
+    box-shadow: none !important;
+    font-size: 18px;
+    color: #525252;
+    letter-spacing: 1.28px;
+    line-height: 20px;
+}
+
+.kdlogin:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0px 1000px white inset;
+}
+
+.kdlogin > #loginUserInfo > .divPartingLine {
+    background: #D4D4D4;
+    height: 1px;
+    width: 310px;
+}
+
+.kd_iconUserName {
+    background-image: url(images/kd_icon.png);
+    background-position: -24px 4px;
+    width: 23px;
+    height: 32px;
+}
+
+.kd_iconPassword {
+    background-image: url(images/kd_icon.png);
+    background-position: -53px 3px;
+    width: 23px;
+    height: 32px;
+}
+
+.kd_iconRefresh {
+    background-image: url(images/kd_icon.png);
+    background-position: -22px -38px;
+    width: 30px;
+    height: 32px;
+    cursor: pointer;
+}
+
+.kd_iconRefresh:hover {
+    background-image: url(images/kd_icon.png);
+    background-position: -61px -36px;
+    width: 30px;
+    background-color: #E8ECF7;
+    height: 32px;
+}
+
+#grid_VelidationCode {
+    width: 310px;
+    margin-top: 20px;
+    margin-left: 34px;
+}
+
+.kdlogin > #loginBtnInfo {
+    margin-top: 20px;
+    margin-left: 80px;
+    background: #2FA7FF;
+    border-radius: 4px;
+    height: 46px;
+    width: 310px;
+}
+
+#velidationCode {
+    border: 1px solid #ABABAB;
+    border-radius: 4px;
+}
+
+#loginBtnInfo > #btnLogin {
+    background: #2FA7FF;
+    border-radius: 4px;
+    font-weight:bold;
+    font-size: 18px;
+    color: #FFFFFF;
+    letter-spacing: 1.28px;
+    line-height: 20px;
+}
+#loginBtnInfo > #forgetpass:hover {
+    color: #1B93EB;
+    text-decoration: underline;
+}
+.kd_iconDelUserHistory {
+    background-image: url(images/kd_icon.png);
+    background-position: 3px -384px;
+    width: 23px;
+    height: 32px;
+    float: right;
+}
+.kd_iconDelUserHistory:hover {
+    cursor: pointer;
+}
+
+#particles-js{
+    position: fixed;
+    width: 100%;
+    height: calc(100% - 100px);
+    height: -moz-calc(100% - 100px);
+    height: -webkit-calc(100% - 100px);
+    background: #0880F4;
+}
+
+#mask{
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: calc(100% - 100px);
+    height: -moz-calc(100% - 100px);
+    height: -webkit-calc(100% - 100px);
+    background: rgba(3, 2, 41, 0.12);
+}
+
+#accountDiv{
+    display: none;
+    z-index: 1;
+}
+
+#qrCodeContent{
+    display: none;
+    z-index: 1;
+}
+#qrCodeDiv {
+    display: none;
+    margin-top: 10%;
+    margin-left: 5%;
+    display: inline-block;
+    position: absolute;
+    min-width: 409px;
+}
+
+#logintypeDiv{
+    position: fixed;
+    width: 100%;
+    height: calc(100% - 100px);
+    height: -moz-calc(100% - 100px);
+    height: -webkit-calc(100% - 100px);
+}
+
+#logintypeDiv .header{
+    text-align: center;
+    margin-top: 9.33%;
+}
+
+#logintypeDiv .typescontainer{
+    margin-top: 8%;
+    text-align: center;
+}
+
+#logintypeDiv .typescontainer .typeItem{
+    display: inline-block;
+    margin: 0 40px;
+}
+
+#logintypeDiv .typescontainer .typeItem .face,
+#logintypeDiv .typescontainer .typeItem .qrcode,
+#logintypeDiv .typescontainer .typeItem .account{
+    width: 120px;
+    height: 120px;
+    border: 2px solid #3CBAFF;
+    cursor: pointer;
+}
+
+#logintypeDiv .typescontainer .typeItem .face{
+    background: url('images/face-icon-big.png') center center no-repeat;
+}
+
+#logintypeDiv .typescontainer .typeItem .qrcode{
+    background: url('images/qrcode-icon-big.png') center center no-repeat;
+}
+
+#logintypeDiv .typescontainer .typeItem .account{
+    background: url('images/account-icon-big.png') center center no-repeat;
+}
+
+#logintypeDiv .typescontainer .typeItem .icon:hover{
+    opacity: 0.6;
+    background: rgba(76,202,249,0.2);
+    /*border: 1px solid #7BFDFD;*/
+    box-shadow: 0 0 5px 0 #1FB0FF;
+}
+
+#logintypeDiv .typescontainer .typeItem .tptext{
+    margin-top: 14px;
+    font-size: 14px;
+    font-weight: lighter;
+    color: #E5E5E5;
+    text-align: center;
+    cursor: default;
+}
+
+#loadingct{
+    position: fixed;
+    display: none;
+    height: 100%;
+    width: 100%;
+    text-align: center;
+    background-color: #067AF4;
+    z-index: 2;
+}
+
+#loadingct .kd-img-loading{
+    margin-top: 18.33%;
+}
+.kd-floatmenu{
+    position: absolute;
+    right: 0;
+    top: 25%;
+}
+.kd-floatmenu .icon{
+    width: 3.3em;
+    height: 3.3em;
+    border: 1px solid #fff;
+    cursor: pointer;
+    margin-top: -1px;
+}
+.kd-floatmenu .icon:hover{
+    opacity: 0.6;
+    background: rgba(76,202,249,0.2);
+    border: 1px solid #7BFDFD;
+    box-shadow: 0 0 5px 0 #1FB0FF;
+}
+.kd-floatmenu .icon:first-child{
+    border-bottom: none;
+}
+.kd-floatmenu .icon .face{
+    background: url(images/face-icon-big.png) center center no-repeat;
+    background-size: 60%;
+    width: 3.3em;
+    height: 3.3em;
+}
+.kd-floatmenu .icon .qrcode{
+    background: url(images/qrcode-icon-big.png) center center no-repeat;
+    background-size: 60%;
+    width: 3.3em;
+    height: 3.3em;
+}
+.kd-floatmenu .icon .account{
+    background: url(images/account-icon-big.png) center center no-repeat;
+    background-size: 60%;
+    width: 3.3em;
+    height: 3.3em;
+}
+
+/*warp*/
+.wrap{
+    display: inline-block;
+    width: 470px;
+    height: 271px;
+    border-radius: 10px;
+    background-color: #ffffff;
+    overflow: hidden;
+    font-size: 14px;
+}
+.login-wrap{
+     border-radius: 0 0 8px 8px ;
+    background: #fff;
+}
+/*content*/
+.login-content{
+    position: relative;
+    height: 250px;
+    width: 360px;
+    margin: auto;
+}
+
+/*scan*/
+.login-scan-qrcode.active{
+    display: block;
+}
+.login-scan-qrcode{
+    background: #f5f6f7;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 10px;
+    display: none;
+}
+.scan-guid {
+    background: url(images/scan-guid.png) no-repeat;
+    position: absolute;
+    width: 127px;
+    height: 170px;
+    top: 39px;
+    opacity: 0;
+    filter: alpha(opacity=0);
+    right: -36px;
+}
+.login-qrcode.active{
+    left:100px;
+}
+.login-qrcode {
+    position: absolute;
+    font-size: 12px;
+    left: 26px;
+    top: 40px;
+    text-align: center;
+}
+.qrcode-reload span {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    background: #fff;
+    opacity: .8;
+    filter: alpha(opacity=80);
+    z-index: 1;
+}
+.qrcode-errreload span {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    background: #fff;
+    opacity: .8;
+    filter: alpha(opacity=80);
+    z-index: 1;
+}
+.login-qrcode b {
+    font-weight: normal;
+}
+.login-qrcode .qr-wrap {
+    display: block;
+    width: 147px;
+    height: 147px;
+    margin-bottom: 10px;
+    position: relative;
+}
+.login-qrcode .qr-wrap img {
+    width: 100%;
+}
+.login-qrcode .qrcode-reload.active{
+    display: block;
+}
+.login-qrcode .qrcode-errreload.active{
+    display: block;
+}
+.login-qrcode .qrcode-reload {
+    display: none;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    left: 0;
+    top: 0;
+    cursor: pointer;
+}
+.login-qrcode .qrcode-errreload {
+    display: none;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    left: 0;
+    top: 0;
+    cursor: pointer;
+}
+.login-qrcode a {
+    color: #3cbaff;
+    cursor: pointer !important;
+}
+.login-qrcode .qrcode-reload i {
+    position: absolute;
+    width: 78px;
+    height: 40px;
+    left: 50%;
+    top: 50%;
+    margin-left: -39px;
+    margin-top: -20px;
+    color: #222;
+    line-height: 20px;
+    z-index: 10;
+    font-weight: bold;
+    font-style: normal;
+}
+.qrcode-reload-en {
+    top: 36% !important;
+}
+.login-qrcode .qrcode-errreload i {
+    position: absolute;
+    width: 78px;
+    height: 40px;
+    left: 50%;
+    top: 60%;
+    margin-left: -34px;
+    margin-top: -40px;
+    color: #222;
+    line-height: 20px;
+    z-index: 10;
+    font-style: normal;
+}
+    .login-qrcode .qrcode-errreload i.linefirst {
+        position: absolute;
+        width: 100px;
+        height: 40px;
+        left: 38%;
+        top: 65%;
+        margin-left: -40px;
+        margin-top: -40px;
+        color: #222;
+        line-height: 20px;
+        z-index: 10;
+    }
+    .login-qrcode .qrcode-errreload i.linesec {
+        position: absolute;
+        width: 120px;
+        height: 40px;
+        left: 38%;
+        top: 80%;
+        margin-left: -36px;
+        margin-top: -40px;
+        color: #222;
+        line-height: 20px;
+        z-index: 10;
+    }
+.login-SRMSupplier {
+    color: #1B93EB;
+    font-size: 1.2em;
+}
+/*footer*/
+#language-list .k-list .k-item,
+#verifyType-list .k-list .k-item {
+    white-space: nowrap;
+}
+
+
+/*login new style start*/
+.content form #divLogin #loginContainer #dbox.kd-login-type-qrcode .kdlogin #verifyType_ct,
+.content form #divLogin #loginContainer #dbox[logintype="cloudaccount"] .kdlogin #verifyType_ct {
+    display:none;
+}
+
+.content form #divLogin #loginContainer #dbox[logintype="cloudaccount"] .kdlogin #SMSVerificationContainer {
+    display: none !important;
+}
+
+.content form #divLogin #loginContainer #dbox.kd-login-type-qrcode .kdlogin #language_ct,
+.content form #divLogin #loginContainer #dbox.kd-login-type-qrcode .kdlogin #datacenter_ct,
+.content form #divLogin #loginContainer #dbox[logintype="cloudaccount"] .kdlogin #language_ct,
+.content form #divLogin #loginContainer #dbox[logintype="cloudaccount"] .kdlogin #datacenter_ct{
+     margin-right:65px !important;
+ }
+
+.content form #divLogin #loginContainer #dbox .boxtitles .boxtitle[data-type="qrcode"] {
+    display: inline-block;
+    padding: 0px;
+    width: 53px;
+    height: 53px;
+    position: absolute;
+    right: 0px;
+    top: 0px;
+    z-index: 10;
+    background-position: -89px -197px;
+} 
+
+.content form #divLogin #loginContainer #dbox > .boxtitles .boxtitle[datarole="qrcode"] {  
+    background-position: -89px -283px;
+}
+
+.content form #divLogin #loginContainer #dbox .boxtitles .boxtitle[data-type="qrcode"] span {
+    color: rgba(27,147,235,1);
+    min-width: 76px;
+    height: 27px;
+    line-height: 27px;
+    background: rgba(5,122,244,0.1);
+    border: 1px solid rgba(5,122,244,1);
+    padding: 0px 3px;
+    position: absolute;
+    right: 52px;
+    bottom: 20px;
+    white-space: nowrap;
+}
+
+.content form #divLogin #loginContainer #dbox > .boxtitles .boxtitle[data-type="qrcode"] .kd-tipline {
+    border-top: 6px transparent solid;
+    border-bottom: 6px transparent solid;
+    border-left: 8px #057AF4 solid;
+    width: 0px;
+    position: absolute;
+    right: 45px;
+    bottom: 28px;
+}
+
+.content form #divLogin #loginContainer #dbox  .boxtitles .boxtitle[data-type="qrcode"] span,
+.content form #divLogin #loginContainer #dbox  .boxtitles .boxtitle[data-type="qrcode"] .kd-tipline  {
+    display:none;
+}
+
+.content form #divLogin #loginContainer #dbox  .boxtitles .boxtitle[data-type="qrcode"]:hover span,
+.content form #divLogin #loginContainer #dbox  .boxtitles .boxtitle[data-type="qrcode"]:hover .kd-tipline  {
+    /*display:block;*/
+}
+
+#loginContainer #boxcontainer #divqrcodedatacenterinfo{
+    display: none !important;
+}
+
+#loginContainer #boxcontainer .wrap{
+    z-index: 1;
+    position:absolute;
+    top: 51px;
+    bottom: 0px;
+}
+
+/*login new style end*/
+
+/*login company nified style start*/
+.kd-company-unified-style .content {
+    background: transparent;
+}
+
+.kd-company-unified-style .content #form1 {
+    height: 100%;
+}
+
+.kd-company-unified-style .content #form1 #loopbanners {
+    background-size: 100% 100%;
+    width: 100%;
+    height: 100%;
+    display: block;
+    margin-top: 0px;
+    background-size: cover;
+}
+
+.kd-company-unified-style .content #form1 #loopbanners .kd-desc-container {
+    position: absolute;
+    left: 5%;
+    top: 33%;
+    width: 100%;
+    display: none;
+}
+
+.kd-company-unified-style .content #form1 #loopbanners #divBarTitle {
+    width: 196px;
+    /* height: 58px; */
+    font-size: 110px;
+    font-weight: 600;
+    color: rgba(255,255,255,1);
+    /* line-height: 58px; */
+    letter-spacing: 10px;
+    top: initial;
+    left: 0%;
+    position: relative;
+    white-space: nowrap;
+}
+
+.kd-company-unified-style .content #form1 #loopbanners #divImgBg {
+    font-size: 90px;
+    font-weight: 600;
+    color: rgba(255,255,255,1);
+    line-height: 46px;
+    letter-spacing: 5px;
+    height: auto;
+    display: block;
+    left: 0%;
+    top: inherit;
+    position: relative;
+    margin-top: 20px;
+    width: inherit;
+    white-space: nowrap;
+}
+
+.kd-company-unified-style .content #form1 #loopbanners .kd-desc-container-en #divBarTitle,
+.kd-company-unified-style .content #form1 #loopbanners .kd-desc-container-en #divImgBg {
+    letter-spacing: 0px;
+    font-size: 60px;
+}
+.kd-company-unified-style .content #form1 #loopbanners .kd-desc-container-en.kd-desc-container-small-W #divBarTitle,
+.kd-company-unified-style .content #form1 #loopbanners .kd-desc-container-en.kd-desc-container-small-W #divImgBg {
+    font-size:35px;
+}
+
+.kd-company-unified-style .content #form1 #loopbanners .kd-desc-container-small-W #divBarTitle,
+.kd-company-unified-style .content #form1 #loopbanners .kd-desc-container-small-W #divImgBg {
+    font-size: 68px;
+}
+
+.kd-company-unified-style .content #form1 #divLogin {
+    margin-top: 0px;
+    display: inline-block;
+    flex: auto;
+    flex: inherit;
+    flex: initial;
+    margin-top: -40px;
+}
+
+.kd-company-unified-style .content #form1 #divLogin,
+.kd-company-unified-style .content .footer {
+    width: 480px ;
+    overflow: hidden;
+    right: 0px;
+    left: auto;
+    left: initial;
+}
+
+.kd-company-unified-style .content form #divLogin #loginContainer {
+}
+
+.kd-company-unified-style .content form #divLogin #loginContainer #dbox {
+    padding-left: 72px;
+    padding-right: 72px;
+    width: inherit;
+    margin-bottom: 50px;
+    overflow: visible;
+    min-height: inherit !important;
+    min-height: auto !important;
+    margin-top: 36px;
+}
+
+.kd-company-unified-style .content form #divLogin #loginContainer #dbox > #boxcontainer {
+    width: inherit;
+}
+
+.kd-company-unified-style .content form #divLogin #loginContainer #dbox > #boxcontainer .kdlogin {
+    width: 100%;
+}
+
+.kd-company-unified-style .content form #divLogin #loginContainer #divTitle {
+    margin-bottom: 26px;
+}
+
+.kd-company-unified-style .content form #divLogin #loginContainer #divTitle .loginKDLogo {
+    width: 275px !important;
+    height: 52px !important;
+    background-size: contain;
+    background-color: #FFF;
+    z-index: 1;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.kd-company-unified-style .content form #divLogin #loginContainer #dbox > .boxtitles .boxtitle {
+    font-size: 14px;
+    font-weight: 400;
+    color: rgba(54,62,79,1);
+    width: 50%;
+    padding-left: 0px;
+}
+
+.kd-company-unified-style .content form #divLogin #loginContainer #dbox > .boxtitles .boxtitle:hover {
+    color: rgba(35,134,238,1);
+}
+
+.kd-company-unified-style .kdlogin > #loginDBInfo #datacenter_ct .k-dropdown-wrap .k-select {
+    position:absolute;
+    top: 1px;
+    display: inline-block;
+}
+
+
+.kd-company-unified-style #loginDBInfo #datacenter_ct .k-input {
+    font-size: 14px;
+    font-weight: 400;
+    color: rgba(86,104,142,1);
+    line-height: 20px;
+    width: auto;
+    display: inline-block;
+    max-width: 100%;
+}
+
+.kd-company-unified-style #grid_VelidationCode {
+    margin-left: 0px;
+    width: 100%;
+    white-space: nowrap;
+}
+
+.kd-company-unified-style #grid_VelidationCode #velidationCode {
+    width: 174px;
+    height: 44px;
+    border-radius: 4px;
+    border: 1px solid rgba(179,187,209,1);
+    padding: 0px;    
+    text-indent: 10px;
+}
+
+.kd-company-unified-style .kd-login-velidationCode {
+    color: #525252;
+}
+
+.kd-company-unified-style .kdlogin > #loginDBInfo {
+    flex-direction: inherit;
+    flex-direction: initial;
+    display: block;
+}
+
+.kd-company-unified-style .kdlogin > #loginDBInfo .k-dropdown-wrap .k-select .k-i-arrow-s {
+    background-position: -83px -1150px;
+    background-image: url(images/kd_icon_extend.png);
+}
+
+.kd-company-unified-style .content form #divLogin #loginContainer #dbox > .boxtitles .boxtitle span {
+    padding: 5px 0;
+}
+
+.kd-company-unified-style .content form #divLogin #loginContainer #dbox .kdlogin #language_ct {
+    position: fixed;
+    right: 0px;
+    top: 10px;
+    margin-right: 10px !important;
+    z-index: 0;
+}
+
+.kd-company-unified-style .kdlogin > #loginUserInfo {
+    width: 100%;
+    padding-left: 0px;
+}
+
+.kd-company-unified-style .kdlogin #loginUserInfo .kd-login-input-container {
+    border-radius: 4px;
+    border: 1px solid rgba(179,187,209,1);
+    margin-top: 24px;
+    overflow: hidden;
+    white-space: nowrap;
+    position: relative;
+}
+
+.kd-company-unified-style .kdlogin #loginUserInfo .kd-login-input-container:first-child {
+    margin-top: 0px;
+    height: 44px !important;
+}
+
+.kd-company-unified-style .kdlogin #loginUserInfo .kd-login-input-container .k-icon {
+    position: absolute;
+    left: 2px;
+    top:50%;
+    margin-top:-16px;
+}
+
+.kd-company-unified-style .kdlogin #loginUserInfo .kd-login-input-container>.k-textbox{
+    left: 25px;
+    position: absolute;
+}
+
+.kd-company-unified-style .kdlogin #loginUserInfo .kd-login-input-container .kd_iconUserName {
+    background-position: -2px -1080px;
+}
+
+.kd-company-unified-style .kdlogin #loginUserInfo .kd-login-input-container .kd_iconPassword {
+   background-position: -3px -1027px;
+}
+
+.kdlogin #loginUserInfo .kd-login-input-container .kd-icon-sms-verification {
+   background-position: -5px -1133px;
+   width: 23px;
+   height: 32px;
+   background-image: url(images/kd_icon_extend.png);
+}
+
+.kd-company-unified-style .kdlogin #loginUserInfo .kd-login-input-container input {
+    padding: 0em;
+    font-size: 14px;
+    font-weight: 400;
+    color: rgba(54,62,79,1);
+}
+
+.kd-company-unified-style .kdlogin > #loginBtnInfo {
+    margin-left: 0px;
+    width: 100%;
+    position: relative;
+}
+
+.kd-company-unified-style .content form #divLogin #loginContainer #dbox > .boxtitles .boxtitle[data-type="qrcode"] {
+    width: 32px;
+    height: 32px;   
+    top: -6px;
+    background-position: -95px -1241px;
+    right: 72px;
+}
+
+.kd-company-unified-style .kdlogin > #loginUserInfo > .divPartingLine {
+    width: 100%;
+    display: none;
+}
+
+.kd-company-unified-style .content form #divLogin #loginContainer #dbox > .boxtitles .boxtitle.active span {
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(35,134,238,1);
+}
+
+.kd-company-unified-style #loginDBInfo .k-input {
+    font-size: 14px;
+    font-weight: 400;
+    color: rgba(86,104,142,1);
+    line-height: 20px;
+    width: auto;
+    display: inline-block;
+    max-width: 100%;
+}
+
+.kd-company-unified-style #loginDBInfo #language_ct .k-dropdown-wrap {
+    padding: 0em;
+    width: auto;
+    max-width: 100%;
+    display: inline-block;
+    float: right;
+    white-space: nowrap;
+}
+
+.kd-company-unified-style #loginDBInfo #language_ct .k-select {
+    position: relative;
+    display: inline-block;
+    overflow: visible;
+    vertical-align: top;
+}
+
+.kd-company-unified-style #loginDBInfo #language_ct .k-input {
+    font-size: 14px;
+    font-weight: 400;
+    color: rgba(147,158,185,1);
+    max-width: 94px;
+    display: inline-block;
+    position: initial;
+    text-indent: 0px;
+}
+
+.kd-company-unified-style .kdlogin > #loginDBInfo #language_ct .k-dropdown-wrap .k-select .k-i-arrow-s {
+    background-position: -86px -1036px;
+    height: 18px;
+    position: initial;
+    margin-top: 3px;
+}
+
+.kd-company-unified-style .kdlogin > #loginBtnInfo #forgetpass {
+    position: absolute;
+    right: 0px;
+    top: -75px;
+    font-size: 12px;
+    font-weight: 400;
+    color: rgba(86,104,142,1);
+}
+
+.kd-company-unified-style .kdlogin > #loginBtnInfo #forgetpass:hover {
+    color: rgba(35,134,238,1);
+}
+
+.kd-login-sms-container  #kd-login-btn-sms,
+.kd-company-unified-style #loginBtnInfo > #btnLogin {
+    background: linear-gradient(180deg,rgba(49,154,242,1) 0%,rgba(35,134,238,1) 100%);
+    font-size: 14px;
+    font-weight: 400;
+    color: rgba(255,255,255,1);
+    border: none;
+}
+
+.kd-login-sms-container #kd-login-btn-sms {
+    height: 44px;
+    width: 130px;
+    float: right;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.kdlogin #loginUserInfo #SMSVerificationContainer {
+    display: none;
+}
+
+.kdlogin #loginUserInfo .kd-login-sms-container .kd-login-sms-tips {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    min-height: 16px;
+    line-height: 16px;
+    color: #939EB9;
+    font-size: 14px;
+    max-height: 50px;
+    overflow: hidden;
+}
+
+.kd-company-unified-style .kdlogin {
+    padding-bottom: 16px;
+}
+
+.kd-company-unified-style #loginContainer #boxcontainer .wrap {
+    width: 100%;
+    border: 1px solid #ffffff;
+}
+
+.kd-company-unified-style .footer #pBrowerVersion,#divServiceContactAndPrivacyPolicy,#divICPNo {
+    font-size: 12px;
+    font-weight: 400;
+    color: rgba(179,187,209,1);
+}
+
+.kd-company-unified-style .footer #pBrowerVersion > #indexDLChrome {
+    color: inherit;
+}
+
+.kd-company-unified-style .footer #pBrowerVersion > #indexDLChrome:hover {
+    text-decoration: underline;
+    color: rgba(35,134,238,1);
+}
+
+.kd-company-unified-style .footer #pBrowerVersion > #indexClearCache {
+    font-size: 12px;
+    font-weight: 400;
+    color: rgba(35,134,238,1);
+}
+
+.kd-company-unified-style .footer #pBrowerVersion > #indexClearCache:hover {
+    text-decoration: underline;
+}
+
+.kd-company-unified-style .footer #pCopyRight {
+    display: none;
+}
+
+.kd-company-unified-style .content form #divLogin #loginContainer #dbox[logintype="cloudaccount"] #boxcontainer #loginUserInfo .kd_iconUserName {
+    background-position: -3px -979px;
+}
+
+.kdlogin > #loginBtnInfo #forgetpass .kd-getpassword-tips {
+    font-weight: 400;
+    color: #56688E;
+    line-height: 17px;
+    background: rgba(34,34,34,1);
+    box-shadow: 0px 2px 8px 0px rgba(0,0,0,0.2);
+    background:rgba(243,245,249,1);
+    position: absolute;
+    right: 100%;
+    min-width: 225px;
+    max-width: 260px;
+    width: auto;
+    padding: 8px;
+    top: 0px;
+    margin-right: 10px;
+    display: none;
+    cursor: initial;
+}
+#dbox[logintype="account"] .kdlogin > #loginBtnInfo #forgetpass .kd-getpassword-tips {
+    display: none !important;
+}
+
+.kdlogin > #loginBtnInfo #forgetpass .kd-getpassword-tips .kd-getpassword-tips-line {
+    border-top: 6px transparent solid;
+    border-bottom: 6px transparent solid;
+    border-left: 10px rgba(243,245,249,1) solid;
+    width: 0px;
+    position: absolute;
+    left: 100%;
+    top: 3px;
+}
+
+#pBrowerVersion .kd-login-spiltline {
+    padding-left:5px;
+    padding-right:5px;
+}
+#pServiceContactAndPrivacyPolicy .kd-login-spiltline {
+    padding-left: 5px;
+    padding-right: 5px;
+}
+.kd-company-unified-style #datacenter_ct .k-dropdown-wrap.k-state-disabled {
+    padding-top: 5px;
+    max-height: 30px;
+}
+
+.kd-company-unified-style .k-list-container {
+    background: rgba(255,255,255,1);
+    border: none;
+    box-shadow: 0px 2px 6px 1px rgba(204,217,234,0.84);
+    border-radius: 4px;
+}
+
+.kd-company-unified-style .k-list-container  .k-list-scroller {
+    overflow-x:hidden;
+}
+
+.kd-company-unified-style .k-list .k-item {
+    height: 44px;
+    line-height: 44px;
+    font-size: 14px;
+    font-weight: 400;
+    color: rgba(54,62,79,1);
+    white-space: nowrap;
+    padding-left:10px;
+    padding-right:18px;
+}
+
+.kd-company-unified-style .k-list-container  .k-list .k-item.k-state-selected, 
+.kd-company-unified-style .k-list .k-item.k-state-focused {
+    background-color: inherit;
+    color: rgba(35,134,238,1);
+}
+
+.kd-company-unified-style .k-list-container  .k-list .k-item.k-state-hover {
+    background: rgba(237,244,254,1);
+}
+
+.kd-company-unified-style .content #form1 #divLogin input::-webkit-input-placeholder { /* WebKit browsers */
+    color:rgba(147,158,185,1);
+}
+
+.kd-company-unified-style .content #form1 #divLogin  input:-moz-placeholder,
+.kd-company-unified-style .content #form1 #divLogin  input::-moz-placeholder { /* Mozilla Firefox 4 to 18 */ 
+   color:rgba(147,158,185,1);
+} 
+
+.kd-company-unified-style .content #form1 #divLogin  input:-moz-placeholder,
+.kd-company-unified-style .content #form1 #divLogin  input::-moz-placeholder { /* Mozilla Firefox 19+ */ 
+    color:rgba(147,158,185,1);
+} 
+
+.kd-company-unified-style .content #form1 #divLogin  input:-ms-input-placeholder { /* Internet Explorer 10+ */ 
+    color:rgba(147,158,185,1);
+} 
+
+.kd-company-unified-style .kdlogin #loginUserInfo .kd-login-input-container:hover,
+.kd-company-unified-style .kdlogin #loginUserInfo .kd-login-input-container.kd-state-focused,
+.kd-company-unified-style .kdlogin #loginUserInfo #velidationCode:hover,
+.kd-company-unified-style .kdlogin #loginUserInfo #velidationCode.kd-state-focused {
+    border: 1px solid rgba(35,134,238,1);
+}
+
+.kd-company-unified-style .content form #divLogin #loginContainer #dbox[logintype="cloudaccount"] #boxcontainer #loginUserInfo .kd-login-input-container:hover .kd_iconUserName,
+.kd-company-unified-style .content form #divLogin #loginContainer #dbox[logintype="cloudaccount"] #boxcontainer #loginUserInfo .kd-login-input-container.kd-state-focused .kd_iconUserName {
+    background-position: -24px -979px;
+}
+
+.kd-company-unified-style .kdlogin #loginUserInfo .kd-login-input-container:hover .kd_iconUserName,
+.kd-company-unified-style .kdlogin #loginUserInfo .kd-login-input-container.kd-state-focused .kd_iconUserName {
+    background-position: -23px -1080px;
+}
+
+.kd-company-unified-style .content form #divLogin #loginContainer #dbox #boxcontainer #loginUserInfo .kd-login-input-container:hover .kd_iconPassword,
+.kd-company-unified-style .content form #divLogin #loginContainer #dbox #boxcontainer #loginUserInfo .kd-login-input-container.kd-state-focused .kd_iconPassword {
+    background-position: -24px -1027px;
+}
+
+.kd-company-unified-style #loginDBInfo #language_ct .k-dropdown-wrap:hover .k-select .k-i-arrow-s {
+    background-position: -115px -1036px;
+}
+
+.kd-company-unified-style #boxcontainer .kdlogin #loginDBInfo .k-dropdown-wrap:hover .k-input {
+    color: rgba(0,134,246,1) ;
+}
+
+.kd-company-unified-style .kdlogin > #loginDBInfo .k-dropdown-wrap:hover .k-select .k-i-arrow-s{
+    background-position: -108px -1150px;
+}
+
+.kd-company-unified-style #loginBtnInfo > #btnLogin:hover {
+    background:linear-gradient(180deg,rgba(92,175,246,1) 0%,rgba(75,155,241,1) 100%);
+}
+
+.kd-login-sms-container  #kd-login-btn-sms:hover,
+.kd-company-unified-style #loginBtnInfo > #btnLogin:hover {
+    background: linear-gradient(180deg,rgba(92,175,246,1) 0%,rgba(75,155,241,1) 100%);
+}
+
+.content form #divLogin #loginContainer #dbox #boxcontainer #loginUserInfo .kd-login-input-container:hover .kd-icon-sms-verification,
+.content form #divLogin #loginContainer #dbox #boxcontainer #loginUserInfo .kd-login-input-container.kd-state-focused .kd-icon-sms-verification {
+    background-position: -30px -1133px;
+}
+
+.kd-company-unified-style .login-content {
+    width: inherit;
+}
+
+.content form #divLogin #loginContainer #dbox.kd-login-type-qrcode .kdlogin #loginBtnInfo{
+    opacity:0;
+}
+
+.kd-company-unified-style .k-tooltip-content {
+    white-space: nowrap;
+}
+
+.kd-company-unified-style #datacenter_ct .k-dropdown .k-dropdown-wrap{
+    border: none;
+    background: rgb(255, 255, 255);
+    text-align: right;
+    box-shadow: none;
+    float: left;
+    max-width: 100%;
+}
+
+.kd-company-unified-style #dbox #loginDBInfo .k-header {
+    background-color: transparent;
+}
+
+
+.kd-bglimitlictype {
+    background: url(../../../images/biz/International/limitLic.png) 0px 0px no-repeat;
+    width: 72px;
+    height: 24px;
+    background-size: cover;
+    position: relative;
+    top: -2px;
+}
+.kd-bglimitlictype1033 {
+    background: url(../../../images/biz/International/limitLic_1033.png) 0px 0px no-repeat;
+    width: 128px;
+    height: 19px;
+    background-size: cover;
+    position: relative;
+    top: -10px;
+}
+.kd-bglimitlictype3076 {
+    background: url(../../../images/biz/International/limitLic_3076.png) 0px 0px no-repeat;
+    width: 72px;
+    height: 24px;
+    background-size: cover;
+    position: relative;
+    top: -2px;
+}
+.kd-bgdemolictype {
+    background: url(../../../images/biz/International/demoLic.png) 0px 0px no-repeat;
+    width: 55px;
+    height: 24px;
+    background-size: cover;
+    position: relative;
+    top: -1px;
+}
+.kd-bgdemolictype1033 {
+    background: url(../../../images/biz/International/demoLic_1033.png) 0px 0px no-repeat;
+    width: 59px;
+    height: 24px;
+    background-size: cover;
+    position: relative;
+    top: -2px;
+}
+.kd-company-unified-style .kdlogin #loginUserInfo .kd-login-msgcontainer {
+    height: 24px;
+    overflow: hidden;
+    line-height: 24px;
+}
+
+.kd-company-unified-style .kdlogin #loginUserInfo .kd-login-input-container.kd-login-psd-container {
+    margin-top: 0px;
+}
+
+/*login company nified style end*/
+.kd-cookieverify-form {
+    height: 100%;
+}
+.kd-cookieverify-mask {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0px;
+    right: 0px;
+    left: 0px;
+    bottom: 0px;
+    background-color: #000000;
+    opacity: 0.5;
+    z-index:11;
+}
+    .kd-cookieverify-form .kd-content-contain
+    {
+        position: absolute;
+        width: 500px;
+        height: 190px;
+        box-shadow: 0px 4px 10px 0px rgba(0,0,0,0.2);
+        border-radius: 2px;
+        background: #FFFFFF;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 111;
+        padding: 25px 0px;
+        box-sizing: border-box;
+    }
+        .kd-cookieverify-form .kd-content-contain .kd-cookieform-content
+        {
+            font-size: 14px;
+            color: #212121;
+            height: 110px;
+            padding: 0px 20px;
+            line-height: 20px;
+        }
+        .kd-cookieverify-form .kd-content-contain .kd-cookieform-content.kd-cookieform-content-english
+        {
+            padding: 0px 15px;
+        }
+        .kd-cookieverify-form .kd-content-contain .kd-cookieform-content .kd-cookie-rule
+        {
+           color: #5582f3;
+           cursor: pointer;
+        }
+        .kd-cookieverify-form .kd-content-contain .kd-cookieform-content.kd-cookieform-content-english .kd-cookie-rule
+        {
+            margin-left: 7px;
+        }
+        .kd-cookieverify-form .kd-content-contain .kd-cookieform-bottom
+        {
+            text-align: center;
+        }
+        .kd-cookieverify-form .kd-content-contain .kd-cookieform-bottom > span
+        {
+            display: inline-block;
+            background-color: #5582F3;
+            color: #FFFFFF;
+            font-size: 14px;
+            border-radius: 2px;
+            padding: 6px 12px;
+            cursor: pointer;
+        }
+.kdlogin .kd-capslock-state {
+    display: none;
+    float: left;
+    white-space: nowrap;
+    max-width: 100%;
+}
+
+.kdlogin .kd-capslock-state .kd-icon {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background-position: -45px -1842px;
+}
+
+.kdlogin .kd-capslock-state .kd-text {
+    font-size: 14px;
+    font-weight: 400;
+    color: rgba(54,62,79,1);
+    display: inline-block;
+    max-width: 90%;
+}
+
