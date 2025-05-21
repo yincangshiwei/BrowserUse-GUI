@@ -33,7 +33,7 @@ from ConfigTool import (
     DEFAULT_LANGUAGE, DEFAULT_BROWSER_CHOICE, DEFAULT_BROWSER_DISABLE_SECURITY,
     DEFAULT_BROWSER_KEEP_ALIVE, DEFAULT_BROWSER_USER_DATA_DIR
 )
-from tool import can_access_internal_service,agent_done
+from tool import can_access_internal_service
 
 # ----------- Global constants ------------
 # CONFIG_FILE = "config.ini" # Moved to ConfigTool.py as CONFIG_FILE_NAME
