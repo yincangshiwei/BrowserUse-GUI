@@ -1,8 +1,11 @@
+Sure, here is the translated content in English:
+
+---
 
 <p align="center">
   <a href="https://github.com/yincangshiwei/BrowserUse-GUI/releases">Download</a>
   ·
-  <a href="https://github.com/yincangshiwei/BrowserUse-GUI/blob/master/README.md">中文文档</a>
+  <a href="https://github.com/yincangshiwei/BrowserUse-GUI/blob/master/README.md">Chinese Documentation</a>
   ·
   <a href="https://github.com/yincangshiwei/BrowserUse-GUI/blob/master/README-EN.md">English Documents</a>
 </p>
@@ -14,73 +17,131 @@
 > BrowserUse Client Version
 
 ```
-Detailed Introduction: Since there is no official client version and the provided web version has limited features that are not suitable for personal use scenarios, 
-I developed this client version and added some extra functionalities. See the feature list for details.
+Detailed Description: Since the official version does not provide a client version, and the web-based functionality is quite basic, which does not meet personal usage scenarios,
+I have created a separate client and expanded some features. For details, see the feature introduction.
 ```
 
-> BrowserUse Official: https://github.com/browser-use/browser-use
+> Official BrowserUse: https://github.com/browser-use/browser-use
 
-## Feature List
+## Feature Introduction
 
-### Basic BrowserUse Features
+### Basic Features of BrowserUse
 
-> 1. Task instruction definition and sending
+> 1. Task Instruction Definition and Sending
 
-> 2. Browser definition
+> 2. Browser Definition
 
-> 3. User data directory specification
+> 3. User Data Directory Specification
 
-> 4. openai configuration
+> 4. OpenAI Configuration
 
-### Client Extended Features
+### Extended Features of the Client
 
-> 1. Task Template Management: Support saving, loading, and setting Task instructions as default templates.
+> 1. Task Template Management: Supports saving task instructions as templates, loading templates, and setting default templates.
 
-> 2. Screenshot support
+> 2. Screenshot Functionality
 
-> 3. File download support
+> 3. File Download Functionality
 
-> 4. Save data as Excel file (both tables and charts)
+> 4. Saving Data as Excel (Data Tables and Charts)
 
-> 5. Export output directory: All automated operation files are output to a specific directory
+> 5. Output Files: Outputs all automated operation files to one directory.
 
-### Client Basic Features
+### Basic Features of the Client
 
-> 1. Configure openai directly in the client
+> 1. Configure OpenAI within the client
 
-> 2. Open config file (config.ini) in the client for viewing and direct modification (Remember to save and close after modifications to prevent write failures)
+> 2. Open configuration file (config.ini) for viewing and direct modification within the client (note that after modification, save and close the configuration file to avoid program write errors).
 
 > 3. View log files
 
-> 4. Display operation logs (key operations) in the client
+> 4. Display operation logs (key events) within the client
 
-> 5. List and open saved files in client; locate their directories with one click
+> 5. Display saved files within the client: Can directly open files from the client and locate file directories
 
-> 6. Support stopping agent execution: The agent will finish its current task before stopping, so this might take a while.
+> 6. Stop Agent Operation: However, it will only stop after the current task is completed by the Task; this requires waiting.
 
-> 7. Support Force Quit: If you don't want to wait, use Force Quit; a confirmation dialog will be shown to prevent data loss if you forgot to save templates.
+> 7. Force Exit Program: If you do not want to wait for the Agent to stop, use this option to exit the program directly. A confirmation box will pop up to prevent loss of unsaved templates.
 
-> 8. Support for both Chinese and English UI
+> 8. Support for bilingual Chinese and English
 
-> 9. Support enterprise environments: Prevents openai key from leaking, but you must download the source code, modify and package it yourself—see Secondary Development Guide.
+> 9. Support for enterprise environment usage: Avoids leaking OpenAI keys but requires downloading source code, modifying code, and packaging yourself. See secondary development instructions for details.
 
 ## Usage Instructions
 
-### Program Execution
+### Running the Program
 
-> Executable file: dist/exe.win-amd64-3.10/main.exe
+> Run file: dist/exe.win-amd64-3.10/main.exe
 
-> If you want to relocate the directory, you must copy the entire 'dist' directory.
+> If you need to store it in another directory, copy the entire 'dist' folder.
+
+### Main Interface Functionalities
+
+#### Main Interface
+
+[image](https://github.com/user-attachments/assets/5080439a-7142-498b-92cb-eed032c839d8)
+
+#### Browser Configuration
+
+[image](https://github.com/user-attachments/assets/fd496ab0-5a21-4452-96bc-cb68f6e1c7a6)
+
+> Custom Chrome Path: It is recommended to keep the default. Enter or select the browser executable address manually. The default can be modified by changing the chrome_binary_path parameter in the config.ini file.
+
+> Use Built-in Chromium: Not recommended. There is no user data directory function, and the browser will close directly after the task is complete without keeping it active.
+
+> Disable Web Security: Not recommended. Keep the default to avoid affecting BrowserUse's reading and operations due to certain webpage functionalities.
+
+> Keep Browser Active After Task Completion: Keeps the current active page of the browser after the task is complete. Only effective with custom Chrome.
+
+> User Data Directory: Browser cache data directory. Only effective with custom Chrome.
+
+#### Task Input
+
+[image](https://github.com/user-attachments/assets/530ae095-ad82-4e92-8d17-f9a1b0cbb6cb)
+
+> Template Management: Save the current instruction content template, load historically saved templates, and set the current instruction content as the default template.
+
+> Specify Input: You can input instruction tasks line-by-line or use structured text format.
+
+> Run: Operate "Run Agent".
+
+[image](https://github.com/user-attachments/assets/ac44d288-c6e7-48ea-80ff-4ef28372ca0e)
+
+#### Operation Log (Key Events)
+
+[image](https://github.com/user-attachments/assets/27a53613-dcdc-42fd-bf5c-2de61faa96fa)
+
+> Displays operation logs, but agent operations are not shown during execution because there would be too much content. For detailed views, execute "View Log File" in settings.
+
+#### Saved Files
+
+[image](https://github.com/user-attachments/assets/0610f03f-983d-4dee-9e94-bdf6d435b03e)
+
+> All files saved during tasks will be displayed here.
+
+> Open Selected File: Select the displayed file to open it directly.
+
+> Open Output Directory: Select the displayed file to enter its directory directly.
+
+#### Settings
+
+[image](https://github.com/user-attachments/assets/70837d77-e2fa-4a14-85fb-91f08c78f098)
+
+> Configure OpenAI: Configure relevant OpenAI information, including the default model.
+
+> View Configuration File: Opens the configuration file for direct modification.
+
+> View Log File: Views the entire program's running logs.
 
 ## Related Technologies
 
-> Python version: 3.11.10 (official requirement >= 3.11)
+> Python Version: 3.11.10 (official requirement >=3.11)
 
-> Core: browser-use
+> Core BrowserUse: browser-use
 
-> GUI: tkinter
+> GUI UI Tool: tkinter
 
-> Packaging: cx_Freeze
+> Packaging Tool: cx_Freeze
 
 ### Directory Structure
 
@@ -102,51 +163,53 @@ BrowserUse/
     ├──agent_outputs/
 ```
 
-Architecture Description:
-- `actions.py`: AI capability extension action implementations.
-- `OpenAITool.py`: OpenAI integration tool.
-- `ConfigTool.py`: Configuration file (config.ini) management tool.
-- `localization.py`: JSON file manager for the locales directory.
-- `main.py`: Main application entry point.
-- `setup.py`: Packaging script for the application.
-- `requirements.txt`: Lists all required dependencies.
+```
+Architecture Overview:
+- `actions.py`: Implementation of extended AI capabilities.
+- `OpenAiTool`: Implementation of tools for interfacing with OpenAI.
+- `ConfigTool.py`: Tool for managing the config.ini file.
+- `localization.py`: Tool for managing language JSON files in the locales directory.
+- `main.py`: Main program file.
+- `setup.py`: Script used for packaging the application.
+- `requirements.txt`: Lists all dependencies.
 - `README.md`: Project documentation (in Chinese).
-- `resources`: Static resources directory.
+- `resources`: Static resource directory.
+```
 
-## Installation
+## Installation Instructions
 
-### 1. Enter Project Directory
+### 1. Navigate to the project directory
 ```sh
 cd BrowserUse
 ```
 
-### 3. Install dependencies
+### 3. Install related dependencies
 ```sh
 pip install -r requirements.txt
 ```
 
-### 4. Run the program
+### 4. Run the file
 ```sh
 python -u main.py
 ```
 
-### 5. Package as exe
+### 5. Package exe
 ```sh
 python setup.py build
 
-# Package as msi
+# To package msi
 # python setup.py bdist_msi
 ```
 
-## Secondary Development Notes
+## Secondary Development Instructions
 
 ### Enterprise Environment Support
 
-> Currently, the system checks if it can connect to an internal enterprise service to determine the environment. Modify as needed for special cases.
+> Temporarily uses whether an internal service connection can be established to determine the environment. Modify if necessary for special cases.
 
 ```
-1. In Enterprise environments, fill in the openai key and base url in ConfigTool.py; do NOT configure these in config.ini.
-2. In main.py, change USER_TYPE to Enterprise, and set ENTERPRISE_NETWORK_CHECK_HOST and ENTERPRISE_NETWORK_CHECK_PORT to the internal service’s IP and port.
+1. Fill in the OpenAI key and base URL address in ConfigTool.py for enterprise environments; no need to configure in config.ini.
+2. Modify USER_TYPE to Enterprise and ENTERPRISE_NETWORK_CHECK_HOST and ENTERPRISE_NETWORK_CHECK_PORT to the IP and port of your enterprise service in main.py.
 ```
 
 ---
