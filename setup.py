@@ -1,6 +1,5 @@
 from cx_Freeze import setup, Executable
 import os
-import uuid
 # 收集静态文件并保留目录结构
 data_files = ['config.ini']
 resources_dir = './resources'  # 静态资源目录
