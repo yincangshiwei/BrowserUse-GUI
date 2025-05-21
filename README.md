@@ -7,6 +7,7 @@
 </p>
 
 - - -
+
 ## 项目介绍
 
 > BrowserUse客户端版
@@ -149,3 +150,5 @@ python setup.py build
 1. 企业环境在ConfigTool.py里面填写openai key和base url地址即可，不需在config.ini里配置。
 2. 在main.py里面修改USER_TYPE为Enterprise，ENTERPRISE_NETWORK_CHECK_HOST和ENTERPRISE_NETWORK_CHECK_PORT改为企业服务的IP和端口。
 ```
+
+---
