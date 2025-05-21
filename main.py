@@ -36,7 +36,6 @@ from ConfigTool import (
 from tool import can_access_internal_service
 
 # ----------- Global constants ------------
-# CONFIG_FILE = "config.ini" # Moved to ConfigTool.py as CONFIG_FILE_NAME
 TASK_TEMPLATE_DIR = "resources/task_template"
 LOCALES_DIR = "resources/locales"
 LOG_FILENAME = "app.log"
