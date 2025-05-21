@@ -66,8 +66,8 @@ ENTERPRISE_NETWORK_CHECK_PORT = 22
 config_manager = ConfigManager(config_file_path_override=CONFIG_FILE_NAME, logger_instance=file_logger)
 
 # Load effective values using ConfigManager
-OPENAI_API_KEY_EFFECTIVE = config_manager.get_value('OPENAI', 'API_KEY', DEFAULT_OPENAI_API_KEY)
-OPENAI_BASE_URL_EFFECTIVE = config_manager.get_value('OPENAI', 'BASE_URL', DEFAULT_OPENAI_BASE_URL)
+OPENAI_API_KEY_EFFECTIVE = config_manager.get_value('OPENAI', 'API_KEY', DEFAULT_OPENAI_API_KEY, treat_empty_as_default=True)
+OPENAI_BASE_URL_EFFECTIVE = config_manager.get_value('OPENAI', 'BASE_URL', DEFAULT_OPENAI_BASE_URL, treat_empty_as_default=True)
 OPENAI_MODEL_NAME_EFFECTIVE = config_manager.get_value('OPENAI', 'MODEL_NAME', DEFAULT_OPENAI_MODEL_NAME)
 OCR_IMAGE_MODEL_EFFECTIVE = config_manager.get_value('OPENAI', 'OCR_IMAGE_MODEL_NAME', DEFAULT_OCR_IMAGE_MODEL_NAME)
 OCR_PDF_MODEL_EFFECTIVE = config_manager.get_value('OPENAI', 'OCR_PDF_MODEL_NAME', DEFAULT_OCR_PDF_MODEL_NAME)
@@ -133,7 +133,6 @@ async def run_agent_async(task_text, openai_api_key, openai_base_url, openai_mod
     file_logger.info(
         f"Config: Model='{openai_model_name}', OCR_Image='{action_config['ocr_image_model_name']}', OCR_PDF='{action_config['ocr_pdf_model_name']}', API_BASE='{openai_base_url}', API_KEY_SET={'Yes' if openai_api_key and openai_api_key != DEFAULT_OPENAI_API_KEY else 'No/Default'}, OutputDir='{output_dir_for_this_task}'")
     file_logger.info(f"Browser choice (from UI for high-level log): {browser_choice_info}")
-
     os.environ["OPENAI_API_KEY"] = openai_api_key
     os.environ["OPENAI_BASE_URL"] = openai_base_url
 
