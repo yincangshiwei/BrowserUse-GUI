@@ -268,42 +268,6 @@ async def run_agent_async(task_text, openai_api_key, openai_base_url, openai_mod
         log_to_gui("agent_log_error_main", error_summary=error_msg_summary, level="ERROR_GUI")
         file_logger.error(f"CRITICAL ERROR during agent execution: {e}\n{tb_full}")
 
-    # finally:
-    #     if browser_instance:
-    #         close_due_to_stop_event = stop_event.is_set()
-    #         close_due_to_keep_alive_false = not browser_keep_alive
-    #
-    #         should_close_browser = False
-    #
-    #         if close_due_to_stop_event:
-    #             should_close_browser = True
-    #             log_key = "agent_log_closing_browser_stop_request"
-    #             log_to_gui(log_key)
-    #             file_logger.info(
-    #                 f"Attempting to close browser instance due to stop request (stop_event: True, keep_alive: {browser_keep_alive})...")
-    #         elif close_due_to_keep_alive_false:  # Implies stop_event is False here
-    #             should_close_browser = True
-    #             log_key = "agent_log_closing_browser"
-    #             log_to_gui(log_key)
-    #             file_logger.info(
-    #                 f"Attempting to close browser instance as keep_alive is False (stop_event: False, keep_alive: False)...")
-    #
-    #         if should_close_browser:
-    #             try:
-    #                 await browser_instance.close()
-    #                 log_to_gui("agent_log_browser_closed")
-    #                 file_logger.info("Browser closed successfully.")
-    #             except Exception as e_close:
-    #                 tb_close = traceback.format_exc()
-    #                 log_to_gui("agent_log_error_closing_browser", error_summary=str(e_close)[:100], level="ERROR_GUI")
-    #                 file_logger.error(f"Error during browser close: {e_close}\n{tb_close}")
-    #         else:
-    #             log_to_gui("agent_log_browser_stays_open", level="INFO_GUI")
-    #             file_logger.info(
-    #                 f"Browser instance will remain open as per keep_alive setting (stop_event: False, keep_alive: True).")
-    #     else:
-    #         file_logger.info("Browser instance was not active or already closed, no explicit close needed in finally.")
-
         if hasattr(controller, 'current_output_dir_from_gui'):
             del controller.current_output_dir_from_gui
             file_logger.debug("Cleaned up controller.current_output_dir_from_gui.")
