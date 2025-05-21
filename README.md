@@ -59,7 +59,11 @@
 
 > 8. 支持中英文双语
 
+> 9. 支持企业环境使用：避免openai key泄露，但需要自行下载源码、修改代码和打包，具体看二次开发说明。
+
 ## 使用说明
+
+### 程序运行
 
 > 运行文件：dist/exe.win-amd64-3.10/main.exe
 
@@ -135,3 +139,13 @@ python setup.py build
 # python setup.py bdist_msi
 ```
 
+## 二次开发说明
+
+### 企业环境支持
+
+> 暂时采用判断是否能够连接到企业内部服务做环境判断，如有特殊场景，自行修改。
+
+```
+1. 企业环境在ConfigTool.py里面填写openai key和base url地址即可，不需在config.ini里配置。
+2. 在main.py里面修改USER_TYPE为Enterprise，ENTERPRISE_NETWORK_CHECK_HOST和ENTERPRISE_NETWORK_CHECK_PORT改为企业服务的IP和端口。
+```

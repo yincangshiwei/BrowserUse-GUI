@@ -58,6 +58,7 @@ if not file_logger.hasHandlers():
 # ---- NEW USER SETTINGS DEFAULTS ----
 USER_TYPE = "Personal"  # Enterprise or Personal
 ENTERPRISE_NETWORK_CHECK_HOST = "10.0.182.21"
+ENTERPRISE_NETWORK_CHECK_PORT = 22
 # ---- END NEW USER SETTINGS DEFAULTS ----
 
 # --- Configuration Loading START ---
@@ -1433,7 +1434,7 @@ if __name__ == "__main__":
     perform_exit = False
     if USER_TYPE.lower() == "enterprise":
         file_logger.info("User type is Enterprise. Performing network check.")
-        if not can_access_internal_service(ENTERPRISE_NETWORK_CHECK_HOST):
+        if not can_access_internal_service(ENTERPRISE_NETWORK_CHECK_HOST, ENTERPRISE_NETWORK_CHECK_PORT):
             file_logger.warning(
                 "Enterprise user detected, but not on the enterprise network (or host not configured/resolvable).")
             # Create temporary Tk root for messagebox if main app isn't up yet
