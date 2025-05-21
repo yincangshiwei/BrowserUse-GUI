@@ -54,7 +54,8 @@
 > 4. 支持在客户端展示操作日志（关键操作）
 
 > 5. 支持在客户端展示保存的文件：可直接在客户端打开文件，可直接定位文件目录
-> 6. 支持停止Agent运行：但需要等Task处理完它当前的任务才会停止，这个需要等待。
+
+> 7. 支持停止Agent运行：但需要等Task处理完它当前的任务才会停止，这个需要等待。
 
 > 7. 支持强制退出程序：不想等待Agent停止，就使用该操作直接退出程序，会弹出确认框，避免用户模板忘记保存导致要重新输入。
 
@@ -69,6 +70,64 @@
 > 运行文件：dist/exe.win-amd64-3.10/main.exe
 
 > 如需另行存放目录，需拷贝 'dist' 整个目录。
+
+### 界面主要功能介绍
+
+#### 主界面
+
+![image](https://github.com/user-attachments/assets/5080439a-7142-498b-92cb-eed032c839d8)
+
+#### 浏览器配置
+
+![image](https://github.com/user-attachments/assets/fd496ab0-5a21-4452-96bc-cb68f6e1c7a6)
+
+> 自定义Chrome路径：建议保持默认，用户自行填入或选择浏览器程序地址，默认可修改config.ini文件里的chrome_binary_path参数
+
+> 使用内置Chromium：不建议使用，没有用户数据目录功能、任务完成后浏览器会直接关闭无法保持。
+
+> 禁用网页安全：不建议取消，保持默认即可，避免某些网页功能影响BrowerUse读取和操作。
+
+> 任务完成后保持浏览器活动：任务完成后保持浏览器当前活动页面，只有自定义Chrome有效。
+
+> 用户数据目录：浏览器缓存数据目录，只有自定义Chrome有效。
+
+#### 任务输入
+
+![image](https://github.com/user-attachments/assets/530ae095-ad82-4e92-8d17-f9a1b0cbb6cb)
+
+> 模板管理：可保存当前指令内容模板、加载历史保存的模板和设置当前的指令内容为默认模板
+
+> 指定输入：可以按行方式输入指令任务流程，也可以使用文本结构化方式。
+
+> 运行：操作“运行 Agent”。
+
+![image](https://github.com/user-attachments/assets/ac44d288-c6e7-48ea-80ff-4ef28372ca0e)
+
+#### 操作日志（关键事件）
+
+![image](https://github.com/user-attachments/assets/27a53613-dcdc-42fd-bf5c-2de61faa96fa)
+
+> 展示操作日志，但Agent操作过程不会展示，因为内容会很多，如需查看详细，直接在设置里面执行“查看日志文件”即可。
+
+#### 已保存文件
+
+![image](https://github.com/user-attachments/assets/0610f03f-983d-4dee-9e94-bdf6d435b03e)
+
+> 任务过程中，保存的文件都会展示在里面
+
+> 打开选定文件：选中展示的文件，直接打开
+
+> 打开输出目录：选中展示的文件，直接进入文件所在目录。
+
+#### 设置
+
+![image](https://github.com/user-attachments/assets/70837d77-e2fa-4a14-85fb-91f08c78f098)
+
+> 配置 OpenAI：配置openai相关信息，默认模型
+
+> 查看配置文件：打开配置文件，可直接对其进行修改。
+
+> 查看日志文件：查看整个程序运行的日志记录。
 
 ## 相关技术
 
