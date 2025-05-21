@@ -1,6 +1,3 @@
-Sure, here is the translated content in English:
-
----
 
 <p align="center">
   <a href="https://github.com/yincangshiwei/BrowserUse-GUI/releases">Download</a>
