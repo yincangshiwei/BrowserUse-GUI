@@ -101,8 +101,6 @@
 
 > 运行：操作“运行 Agent”。
 
-![image](https://github.com/user-attachments/assets/ac44d288-c6e7-48ea-80ff-4ef28372ca0e)
-
 #### 操作日志（关键事件）
 
 ![image](https://github.com/user-attachments/assets/27a53613-dcdc-42fd-bf5c-2de61faa96fa)
