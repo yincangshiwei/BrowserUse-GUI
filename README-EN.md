@@ -14,7 +14,8 @@
 > BrowserUse Client Version
 
 ```
-Detailed Introduction: Since there is no official client version and the provided web version has limited features that are not suitable for personal use scenarios, I developed this client version and added some extra functionalities. See the feature list for details.
+Detailed Introduction: Since there is no official client version and the provided web version has limited features that are not suitable for personal use scenarios, 
+I developed this client version and added some extra functionalities. See the feature list for details.
 ```
 
 > BrowserUse Official: https://github.com/browser-use/browser-use
