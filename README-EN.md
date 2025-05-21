@@ -76,11 +76,11 @@ I have created a separate client and expanded some features. For details, see th
 
 #### Main Interface
 
-[image](https://github.com/user-attachments/assets/5080439a-7142-498b-92cb-eed032c839d8)
+![image](https://github.com/user-attachments/assets/55b252a6-7625-4a72-ae27-afd6968eba76)
 
 #### Browser Configuration
 
-[image](https://github.com/user-attachments/assets/fd496ab0-5a21-4452-96bc-cb68f6e1c7a6)
+![image](https://github.com/user-attachments/assets/200e8637-68fa-40d4-afab-d35dff6f9138)
 
 > Custom Chrome Path: It is recommended to keep the default. Enter or select the browser executable address manually. The default can be modified by changing the chrome_binary_path parameter in the config.ini file.
 
@@ -94,7 +94,7 @@ I have created a separate client and expanded some features. For details, see th
 
 #### Task Input
 
-[image](https://github.com/user-attachments/assets/530ae095-ad82-4e92-8d17-f9a1b0cbb6cb)
+![image](https://github.com/user-attachments/assets/7782153f-91ae-454a-807b-a39e71d20981)
 
 > Template Management: Save the current instruction content template, load historically saved templates, and set the current instruction content as the default template.
 
@@ -102,17 +102,15 @@ I have created a separate client and expanded some features. For details, see th
 
 > Run: Operate "Run Agent".
 
-[image](https://github.com/user-attachments/assets/ac44d288-c6e7-48ea-80ff-4ef28372ca0e)
-
 #### Operation Log (Key Events)
 
-[image](https://github.com/user-attachments/assets/27a53613-dcdc-42fd-bf5c-2de61faa96fa)
+![image](https://github.com/user-attachments/assets/66cda241-a641-45f5-a1c9-d358da955a35)
 
 > Displays operation logs, but agent operations are not shown during execution because there would be too much content. For detailed views, execute "View Log File" in settings.
 
 #### Saved Files
 
-[image](https://github.com/user-attachments/assets/0610f03f-983d-4dee-9e94-bdf6d435b03e)
+![image](https://github.com/user-attachments/assets/6716cb3d-557c-4b79-9f1a-72ded6cb604e)
 
 > All files saved during tasks will be displayed here.
 
@@ -122,7 +120,7 @@ I have created a separate client and expanded some features. For details, see th
 
 #### Settings
 
-[image](https://github.com/user-attachments/assets/70837d77-e2fa-4a14-85fb-91f08c78f098)
+![image](https://github.com/user-attachments/assets/94e95727-e6f4-4f3e-bed5-96c62a93b85b)
 
 > Configure OpenAI: Configure relevant OpenAI information, including the default model.
 
