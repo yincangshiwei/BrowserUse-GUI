@@ -124,7 +124,12 @@
     "action_log_warn_cannot_remove_file": "WARNING: Could not remove existing file {filename}: {error}",
     "action_log_image_ocr_success_summary": "Image '{filename}' OCR complete: {reply_summary}...",
     "action_log_pdf_processed_summary": "PDF '{filename}' content processed: {reply_summary}...",
-    "status_default": "Default/Placeholder",
-    "status_yes_custom": "Yes (custom/from file)"
+    "error_context_main_agent_error": "Agent error: {error_summary}",
+    "error_context_agent_stop_requested": "Agent stop requested",
+    "status_default",: "Default/Placeholder",
+    "status_yes_custom": "Yes (custom/from file)",
+    "language_display_name": "English",
+    "app_title": "My Awesome Agent App",
+    "welcome_message": "Welcome, {name}!"
 
 }

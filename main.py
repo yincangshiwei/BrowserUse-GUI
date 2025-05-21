@@ -1,18 +1,16 @@
 # main.py
+from typing import List
 
 from langchain_openai import ChatOpenAI
 from browser_use import Agent, Browser, BrowserConfig, Controller  # Assuming BrowserConfig handles new args
 import asyncio
 import os
 import sys
-import socket
-# import pandas as pd # Not used, can be removed
 import traceback
 import threading
 import queue  # For thread-safe communication
 import platform  # For opening file explorer
 import subprocess  # For opening file explorer
-# import configparser # No longer directly used here
 import logging  # For file logging
 from datetime import datetime  # For timestamping GUI messages
 
@@ -35,6 +33,7 @@ from ConfigTool import (
     DEFAULT_LANGUAGE, DEFAULT_BROWSER_CHOICE, DEFAULT_BROWSER_DISABLE_SECURITY,
     DEFAULT_BROWSER_KEEP_ALIVE, DEFAULT_BROWSER_USER_DATA_DIR
 )
+from tool import can_access_internal_service,agent_done
 
 # ----------- Global constants ------------
 # CONFIG_FILE = "config.ini" # Moved to ConfigTool.py as CONFIG_FILE_NAME
@@ -89,19 +88,6 @@ INITIAL_BROWSER_USER_DATA_DIR = config_manager.get_value('BROWSER_ADVANCED_SETTI
 
 
 # --- Configuration END ---
-
-# REMOVED: ensure_default_config_file_exists() - Handled by ConfigManager
-# REMOVED: config.read() - Handled by ConfigManager
-# REMOVED: get_config_value() function - Replaced by config_manager.get_value()
-
-def can_access_internal_service(host, port=22, timeout=2):
-    try:
-        s = socket.create_connection((host, port), timeout=timeout)
-        s.close()
-        return True
-    except Exception:
-        return False
-
 
 # ---- Language Manager Initialization ----
 lang_manager = LanguageManager(locales_dir=LOCALES_DIR, initial_lang=INITIAL_LANGUAGE, fallback_lang=DEFAULT_LANGUAGE)
@@ -267,54 +253,56 @@ async def run_agent_async(task_text, openai_api_key, openai_base_url, openai_mod
         else:
             log_to_gui("agent_log_execution_finished_processing", level="IMPORTANT_GUI")
             result_str = str(result)
-            gui_result_summary = result_str[:300] + ("..." if len(result_str) > 300 else "")
-            log_to_gui("agent_log_final_result_summary", summary=gui_result_summary)
+            log_to_gui("agent_log_final_result_summary", summary=f"\n{result.final_result()}")
             file_logger.info(f"--- Agent Execution Result ---:\n{result_str}")
+            file_logger.info(f"--- Agent Execution Result(final) ---:\n{result.final_result()}")
             log_to_gui("agent_log_check_output_dir", level="IMPORTANT_GUI", abs_output_dir=abs_output_dir)
 
     except Exception as e:
+        traceback.print_exc()
         tb_full = traceback.format_exc()
         error_context_message = lang_manager.get(
             "error_context_agent_stop_requested") if stop_event.is_set() else lang_manager.get(
             "error_context_main_agent_error")
         error_msg_summary = f"{error_context_message}: {type(e).__name__} - {str(e)[:150]}"
-        log_to_gui("agent_log_error_main", summary=error_msg_summary, level="ERROR_GUI")
+        log_to_gui("agent_log_error_main", error_summary=error_msg_summary, level="ERROR_GUI")
         file_logger.error(f"CRITICAL ERROR during agent execution: {e}\n{tb_full}")
-    finally:
-        if browser_instance:
-            close_due_to_stop_event = stop_event.is_set()
-            close_due_to_keep_alive_false = not browser_keep_alive
 
-            should_close_browser = False
-
-            if close_due_to_stop_event:
-                should_close_browser = True
-                log_key = "agent_log_closing_browser_stop_request"
-                log_to_gui(log_key)
-                file_logger.info(
-                    f"Attempting to close browser instance due to stop request (stop_event: True, keep_alive: {browser_keep_alive})...")
-            elif close_due_to_keep_alive_false:  # Implies stop_event is False here
-                should_close_browser = True
-                log_key = "agent_log_closing_browser"
-                log_to_gui(log_key)
-                file_logger.info(
-                    f"Attempting to close browser instance as keep_alive is False (stop_event: False, keep_alive: False)...")
-
-            if should_close_browser:
-                try:
-                    await browser_instance.close()
-                    log_to_gui("agent_log_browser_closed")
-                    file_logger.info("Browser closed successfully.")
-                except Exception as e_close:
-                    tb_close = traceback.format_exc()
-                    log_to_gui("agent_log_error_closing_browser", error_summary=str(e_close)[:100], level="ERROR_GUI")
-                    file_logger.error(f"Error during browser close: {e_close}\n{tb_close}")
-            else:
-                log_to_gui("agent_log_browser_stays_open", level="INFO_GUI")
-                file_logger.info(
-                    f"Browser instance will remain open as per keep_alive setting (stop_event: False, keep_alive: True).")
-        else:
-            file_logger.info("Browser instance was not active or already closed, no explicit close needed in finally.")
+    # finally:
+    #     if browser_instance:
+    #         close_due_to_stop_event = stop_event.is_set()
+    #         close_due_to_keep_alive_false = not browser_keep_alive
+    #
+    #         should_close_browser = False
+    #
+    #         if close_due_to_stop_event:
+    #             should_close_browser = True
+    #             log_key = "agent_log_closing_browser_stop_request"
+    #             log_to_gui(log_key)
+    #             file_logger.info(
+    #                 f"Attempting to close browser instance due to stop request (stop_event: True, keep_alive: {browser_keep_alive})...")
+    #         elif close_due_to_keep_alive_false:  # Implies stop_event is False here
+    #             should_close_browser = True
+    #             log_key = "agent_log_closing_browser"
+    #             log_to_gui(log_key)
+    #             file_logger.info(
+    #                 f"Attempting to close browser instance as keep_alive is False (stop_event: False, keep_alive: False)...")
+    #
+    #         if should_close_browser:
+    #             try:
+    #                 await browser_instance.close()
+    #                 log_to_gui("agent_log_browser_closed")
+    #                 file_logger.info("Browser closed successfully.")
+    #             except Exception as e_close:
+    #                 tb_close = traceback.format_exc()
+    #                 log_to_gui("agent_log_error_closing_browser", error_summary=str(e_close)[:100], level="ERROR_GUI")
+    #                 file_logger.error(f"Error during browser close: {e_close}\n{tb_close}")
+    #         else:
+    #             log_to_gui("agent_log_browser_stays_open", level="INFO_GUI")
+    #             file_logger.info(
+    #                 f"Browser instance will remain open as per keep_alive setting (stop_event: False, keep_alive: True).")
+    #     else:
+    #         file_logger.info("Browser instance was not active or already closed, no explicit close needed in finally.")
 
         if hasattr(controller, 'current_output_dir_from_gui'):
             del controller.current_output_dir_from_gui

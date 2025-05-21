@@ -119,7 +119,7 @@
     "agent_log_execution_finished_processing": "--- Agent 执行完毕，处理结果中... ---",
     "agent_log_final_result_summary": "最终结果 (摘要): {summary}",
     "agent_log_check_output_dir": "--- 请检查 '{abs_output_dir}' 目录中的已保存文件。 ---",
-    "agent_log_error_main": "错误: {summary}",
+    "agent_log_error_main": "错误: {error_summary}",
     "agent_log_closing_browser": "正在关闭浏览器...",
     "agent_log_closing_browser_stop_request": "因停止请求，正在关闭浏览器...",
     "agent_log_browser_closed": "浏览器已关闭。",
@@ -129,6 +129,11 @@
     "action_log_warn_cannot_remove_file": "警告: 无法删除已存在的文件 {filename}: {error}",
     "action_log_image_ocr_success_summary": "图片 '{filename}' OCR 完成: {reply_summary}...",
     "action_log_pdf_processed_summary": "PDF '{filename}' 内容已处理: {reply_summary}...",
+    "error_context_main_agent_error": "Agent 错误: {error_summary}",
+    "error_context_agent_stop_requested": "Agent 停止请求",
     "status_default": "默认/占位符",
-    "status_yes_custom": "是 (自定义/来自文件)"
+    "status_yes_custom": "是 (自定义/来自文件)",
+    "language_display_name": "中文",
+    "app_title": "我的智能代理应用",
+    "welcome_message": "欢迎, {name}!"
 }
