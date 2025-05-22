@@ -3,6 +3,7 @@ from langchain_openai import ChatOpenAI
 from browser_use import Agent, Browser, BrowserConfig, Controller  # Assuming BrowserConfig handles new args
 import asyncio
 import os
+import gc
 import sys
 import traceback
 import threading
@@ -1293,6 +1294,7 @@ class AgentApp:
                     for t_item in pending: t_item.cancel()
                     loop.run_until_complete(asyncio.gather(*pending, return_exceptions=True))
                 loop.run_until_complete(asyncio.sleep(0.1))  # type: ignore[arg-type]
+                gc.collect()
             except RuntimeError as e_runtime:
                 file_logger.error(f"Async thread: Runtime error during task cleanup in event loop: {e_runtime}")
             except Exception as eloop_clean:
