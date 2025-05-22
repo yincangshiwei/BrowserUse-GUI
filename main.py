@@ -9,6 +9,7 @@ import threading
 import queue  # For thread-safe communication
 import platform  # For opening file explorer
 import subprocess  # For opening file explorer
+import logging
 from datetime import datetime  # For timestamping GUI messages
 
 # --- Tkinter specific imports ---
@@ -28,9 +29,13 @@ from ConfigTool import (
     DEFAULT_BROWSER_KEEP_ALIVE, DEFAULT_BROWSER_USER_DATA_DIR
 )
 from tool import can_access_internal_service
+from AISystemPrompt import SYSTEM_PROMPT_OPTIMIZE_TASK
 from LogTool import LogTool
 # ----------- Localization Import -----------
 from localization import LanguageManager
+from OpenAITool import OpenAITool
+
+openAITool = OpenAITool()
 
 # ----------- Global constants ------------
 TASK_TEMPLATE_DIR = "resources/task_template"
@@ -52,8 +57,10 @@ ENTERPRISE_NETWORK_CHECK_PORT = 22
 config_manager = ConfigManager(config_file_path_override=CONFIG_FILE_NAME, logger_instance=file_logger)
 
 # Load effective values using ConfigManager
-OPENAI_API_KEY_EFFECTIVE = config_manager.get_value('OPENAI', 'API_KEY', DEFAULT_OPENAI_API_KEY, treat_empty_as_default=True)
-OPENAI_BASE_URL_EFFECTIVE = config_manager.get_value('OPENAI', 'BASE_URL', DEFAULT_OPENAI_BASE_URL, treat_empty_as_default=True)
+OPENAI_API_KEY_EFFECTIVE = config_manager.get_value('OPENAI', 'API_KEY', DEFAULT_OPENAI_API_KEY,
+                                                    treat_empty_as_default=True)
+OPENAI_BASE_URL_EFFECTIVE = config_manager.get_value('OPENAI', 'BASE_URL', DEFAULT_OPENAI_BASE_URL,
+                                                     treat_empty_as_default=True)
 OPENAI_MODEL_NAME_EFFECTIVE = config_manager.get_value('OPENAI', 'MODEL_NAME', DEFAULT_OPENAI_MODEL_NAME)
 OCR_IMAGE_MODEL_EFFECTIVE = config_manager.get_value('OPENAI', 'OCR_IMAGE_MODEL_NAME', DEFAULT_OCR_IMAGE_MODEL_NAME)
 OCR_PDF_MODEL_EFFECTIVE = config_manager.get_value('OPENAI', 'OCR_PDF_MODEL_NAME', DEFAULT_OCR_PDF_MODEL_NAME)
@@ -90,7 +97,7 @@ action_config = {
 register_actions(controller, gui_feedback_queue, INITIAL_OUTPUT_DIR, file_logger, action_config)
 
 
-# --- Agent Logic --- (No changes needed in this function itself, but its parameters are sourced using ConfigManager)
+# --- Agent Logic ---
 async def run_agent_async(task_text, openai_api_key, openai_base_url, openai_model_name,
                           chrome_binary_path_or_none, output_dir_for_this_task, stop_event: threading.Event,
                           browser_disable_security: bool,
@@ -111,10 +118,11 @@ async def run_agent_async(task_text, openai_api_key, openai_base_url, openai_mod
     if stop_event.is_set():
         log_to_gui("agent_log_cancelled_before_start", "WARNING_GUI")
         file_logger.warning("Agent run cancelled before start (due to stop request before full initialization)")
-        gui_feedback_queue.put({"type": "task_complete", "stopped_by_user": True})
+        gui_feedback_queue.put({"type": "task_complete", "stopped_by_user": True, "error": False})
         return
 
     browser_instance = None
+    task_completed_successfully_flag = False  # Flag to denote successful agent.run() outcome
     try:
         abs_output_dir = os.path.abspath(output_dir_for_this_task)
         os.makedirs(abs_output_dir, exist_ok=True)
@@ -128,7 +136,7 @@ async def run_agent_async(task_text, openai_api_key, openai_base_url, openai_mod
         if stop_event.is_set():
             log_to_gui("agent_log_cancelled_before_browser", "WARNING_GUI")
             file_logger.warning("Agent run cancelled before browser setup (due to stop request)")
-            gui_feedback_queue.put({"type": "task_complete", "stopped_by_user": True})
+            gui_feedback_queue.put({"type": "task_complete", "stopped_by_user": True, "error": False})
             return
 
         log_to_gui("agent_log_using_default_model", model_name=openai_model_name)
@@ -213,7 +221,7 @@ async def run_agent_async(task_text, openai_api_key, openai_base_url, openai_mod
         if stop_event.is_set():
             log_to_gui("agent_log_cancelled_before_agent_init", "WARNING_GUI")
             file_logger.warning("Agent run cancelled before agent initialization (due to stop request)")
-            gui_feedback_queue.put({"type": "task_complete", "stopped_by_user": True})
+            gui_feedback_queue.put({"type": "task_complete", "stopped_by_user": True, "error": False})  # FIX 1 Cont.
             if browser_instance: await browser_instance.close()
             return
 
@@ -231,6 +239,7 @@ async def run_agent_async(task_text, openai_api_key, openai_base_url, openai_mod
         file_logger.info("--- Agent core execution started. ---")
         result = await agent.run()
         file_logger.info("--- Agent core execution finished. ---")
+        task_completed_successfully_flag = True  # Mark as successful up to this point
 
         if stop_event.is_set():
             log_to_gui("agent_log_task_completed_stop_requested", level="WARNING_GUI")
@@ -243,6 +252,9 @@ async def run_agent_async(task_text, openai_api_key, openai_base_url, openai_mod
             file_logger.info(f"--- Agent Execution Result ---:\n{result_str}")
             file_logger.info(f"--- Agent Execution Result(final) ---:\n{result.final_result()}")
             log_to_gui("agent_log_check_output_dir", level="IMPORTANT_GUI", abs_output_dir=abs_output_dir)
+
+        # FIX 1: Ensure task_complete is sent for successful runs or runs completed with a stop request
+        gui_feedback_queue.put({"type": "task_complete", "stopped_by_user": stop_event.is_set(), "error": False})
 
     except Exception as e:
         traceback.print_exc()
@@ -258,7 +270,23 @@ async def run_agent_async(task_text, openai_api_key, openai_base_url, openai_mod
             del controller.current_output_dir_from_gui
             file_logger.debug("Cleaned up controller.current_output_dir_from_gui.")
 
-        gui_feedback_queue.put({"type": "task_complete", "stopped_by_user": stop_event.is_set()})
+        # FIX 1 Cont.: Ensure task_complete is sent on error
+        gui_feedback_queue.put({"type": "task_complete", "stopped_by_user": stop_event.is_set(), "error": True})
+
+    finally:
+        if browser_instance:
+            await browser_instance.close()
+            file_logger.info("Browser instance closed in run_agent_async finally block.")
+
+        # This was the old place that missed successful completion scenarios
+        # if not task_completed_successfully_flag and not stop_event.is_set(): # Check if already sent by try or except
+        #    # This specific scenario where it reaches finally due to non-exception, non-stop early exit
+        #    # is less likely with the current explicit returns, but good for robustness.
+        #    # However, if an error path did not send it, this might be a fallback.
+        #    # Given the explicit puts now, this might be redundant or cause double messages.
+        #    # Let's rely on the explicit puts in try/except/early_returns for now.
+        #    pass
+
         file_logger.info("Agent run_agent_async finished (successfully or with error).")
 
 
@@ -330,7 +358,6 @@ class OpenAIConfigDialog(tk.Toplevel):
         self.save_button = ttk.Button(self.button_frame, command=self.save_config)
         self.save_button.pack(side=tk.RIGHT, padx=5)
 
-
     def update_ui_text(self):
         self.title(lang_manager.get("openai_config_dialog_title"))
         self.basic_config_frame.config(text=lang_manager.get("frame_basic_config"))
@@ -360,7 +387,7 @@ class OpenAIConfigDialog(tk.Toplevel):
 
     def save_config(self):
         global OPENAI_API_KEY_EFFECTIVE, OPENAI_BASE_URL_EFFECTIVE, OPENAI_MODEL_NAME_EFFECTIVE
-        global OCR_IMAGE_MODEL_EFFECTIVE, OCR_PDF_MODEL_EFFECTIVE, action_config  # config_manager is global
+        global OCR_IMAGE_MODEL_EFFECTIVE, OCR_PDF_MODEL_EFFECTIVE, action_config
 
         new_api_key = self.api_key_var.get()
         new_base_url = self.base_url_var.get()
@@ -392,11 +419,10 @@ class OpenAIConfigDialog(tk.Toplevel):
                                     lang_manager.get("openai_config_saved_success"), parent=self)
                 self.destroy()
             else:
-                # config_manager.save() logs error internally.
                 messagebox.showerror(lang_manager.get("message_error_title"),
                                      lang_manager.get("openai_config_saved_failed", error="See app.log"), parent=self)
 
-        except Exception as e:  # Catch any other exception from set_value or logic here
+        except Exception as e:
             file_logger.error(f"Unexpected error saving OpenAI config: {e}\n{traceback.format_exc()}")
             messagebox.showerror(lang_manager.get("message_error_title"),
                                  lang_manager.get("openai_config_unexpected_error", error=e), parent=self)
@@ -434,15 +460,14 @@ class AgentApp:
         self.previous_browser_choice.set(self.browser_choice_var.get())
 
     def build_ui(self):
-        # ... (UI building code remains largely the same)
         self.menubar = Menu(self.root)
 
         self.setting_menu = Menu(self.menubar, tearoff=0)
-        self.setting_menu.add_command(command=self.show_openai_config_dialog)  # Index 0
-        self.setting_menu.add_command(command=self.view_config_file)  # Index 1- NEW
-        self.setting_menu.add_command(command=self.view_log_file)  # Index 2
-        self.setting_menu.add_separator()  # Index 3
-        self.setting_menu.add_command(command=self.on_closing)  # Index 4
+        self.setting_menu.add_command(command=self.show_openai_config_dialog)
+        self.setting_menu.add_command(command=self.view_config_file)
+        self.setting_menu.add_command(command=self.view_log_file)
+        self.setting_menu.add_separator()
+        self.setting_menu.add_command(command=self.on_closing)
         self.menubar.add_cascade(label="_PLACEHOLDER_SETTING_MENU_", menu=self.setting_menu)
 
         self.language_menu = Menu(self.menubar, tearoff=0)
@@ -510,6 +535,12 @@ class AgentApp:
         self.task_frame_lframe.pack(fill=tk.BOTH, expand=True, pady=5)
         template_button_frame = ttk.Frame(self.task_frame_lframe)
         template_button_frame.pack(fill=tk.X, pady=(5, 5), padx=5)
+
+        # ---- NEW: AI Optimize Prompt Button ----
+        self.optimize_prompt_button = ttk.Button(template_button_frame, command=self.optimize_task_prompt)
+        self.optimize_prompt_button.pack(side=tk.LEFT, padx=(0, 5))
+        # ---- END NEW ----
+
         self.load_template_button = ttk.Button(template_button_frame, command=self.load_task_template)
         self.load_template_button.pack(side=tk.LEFT, padx=(0, 5))
         self.save_template_button = ttk.Button(template_button_frame, command=self.save_task_template)
@@ -559,7 +590,6 @@ class AgentApp:
         self.open_dir_button.pack(side=tk.LEFT, fill=tk.X, expand=True)
 
     def update_ui_text(self):
-        # ... (UI text update code remains largely the same, uses lang_manager)
         self.root.title(lang_manager.get("app_title"))
         try:
             setting_cascade_index = self.menubar.index("_PLACEHOLDER_SETTING_MENU_")
@@ -592,6 +622,9 @@ class AgentApp:
         self.browse_user_data_dir_button.config(text=lang_manager.get("button_browse_dir"))
 
         self.task_frame_lframe.config(text=lang_manager.get("frame_task_input"))
+        # ---- NEW: Update optimize prompt button text ----
+        self.optimize_prompt_button.config(text=lang_manager.get("button_optimize_prompt"))
+        # ---- END NEW ----
         self.load_template_button.config(text=lang_manager.get("button_load_template"))
         self.save_template_button.config(text=lang_manager.get("button_save_template"))
         self.set_default_button.config(text=lang_manager.get("button_set_default_task"))
@@ -604,9 +637,53 @@ class AgentApp:
         self.open_file_button.config(text=lang_manager.get("button_open_selected_file"))
         self.open_dir_button.config(text=lang_manager.get("button_open_output_dir"))
 
+    # ---- NEW: Method to handle AI prompt optimization ----
+    def _threaded_optimize_prompt(self, original_prompt: str):
+        try:
+            file_logger.info(f"Threaded prompt optimization started for: '{original_prompt[:50]}...'")
+            # Use a specific model or the default one. Consider a faster/cheaper model for this.
+            # For now, using the general default model.
+            model_to_use = OPENAI_MODEL_NAME_EFFECTIVE
+            full_system_prompt = SYSTEM_PROMPT_OPTIMIZE_TASK
+            api_key = OPENAI_API_KEY_EFFECTIVE
+            base_url = OPENAI_BASE_URL_EFFECTIVE
+            os.environ["OPENAI_API_KEY"] = api_key
+            os.environ["OPENAI_BASE_URL"] = base_url
+            optimized_prompt = openAITool.call_gpt_api(user_content=original_prompt, model=model_to_use,
+                                                       system_prompt=full_system_prompt)
+            gui_feedback_queue.put({
+                "type": "prompt_optimization_result",
+                "status": "success",
+                "optimized_prompt": optimized_prompt.strip()
+            })
+            file_logger.info(f"Prompt optimization successful. Result: '{optimized_prompt[:100]}...'")
+        except Exception as e:
+            tb_str = traceback.format_exc()
+            file_logger.error(f"Error during prompt optimization: {e}\n{tb_str}")
+            gui_feedback_queue.put({
+                "type": "prompt_optimization_result",
+                "status": "error",
+                "error_message": str(e)
+            })
+
+    def optimize_task_prompt(self):
+        current_prompt = self.task_text.get("1.0", tk.END).strip()
+        if not current_prompt:
+            messagebox.showwarning(lang_manager.get("message_warning_title"),
+                                   lang_manager.get("warning_prompt_empty_no_optimize"), parent=self.root)
+            return
+
+        self.optimize_prompt_button.config(state='disabled')
+        self.log_message_to_gui("gui_log_optimizing_prompt", level="INFO_GUI")
+        self.root.update_idletasks()  # Ensure UI updates immediately
+
+        threading.Thread(target=self._threaded_optimize_prompt, args=(current_prompt,), daemon=True).start()
+
+    # ---- END NEW ----
+
     def show_openai_config_dialog(self):
         dialog = OpenAIConfigDialog(self.root)
-        self.root.wait_window(dialog)  # Waits for dialog to close
+        self.root.wait_window(dialog)
 
     def view_log_file(self):
         log_path = os.path.abspath(LOG_FILENAME)
@@ -630,7 +707,7 @@ class AgentApp:
                                  parent=self.root)
             file_logger.error(f"Failed to open log file '{log_path}': {e}")
 
-    def view_config_file(self):  # Uses CONFIG_FILE_NAME from ConfigTool
+    def view_config_file(self):
         config_path = os.path.abspath(CONFIG_FILE_NAME)
         if not os.path.exists(config_path):
             messagebox.showinfo(lang_manager.get("message_info_title"),
@@ -689,7 +766,6 @@ class AgentApp:
                     parent=self.root
             ):
                 self.previous_browser_choice.set(current_choice)
-                # Explicitly pass force_save_browser_choice=True
                 if self.save_app_settings_to_config(force_save_browser_choice=True):
                     self.perform_restart()
                 else:
@@ -702,26 +778,24 @@ class AgentApp:
                                                  error="[Save failed, see app.log]"),
                         parent=self.root
                     )
-                    self.browser_choice_var.set(previous_choice)  # Revert UI
-                    self.previous_browser_choice.set(previous_choice)  # Revert internal state
+                    self.browser_choice_var.set(previous_choice)
+                    self.previous_browser_choice.set(previous_choice)
                     self.update_browser_path_state()
             else:
                 file_logger.info("User cancelled restart. Reverting browser choice UI.")
-                self.browser_choice_var.set(previous_choice)  # Revert UI
-                # previous_browser_choice already holds 'previous_choice', so no need to set it again if cancelling
+                self.browser_choice_var.set(previous_choice)
                 self.update_browser_path_state()
                 messagebox.showinfo(
                     title=lang_manager.get("change_cancelled_title"),
                     message=lang_manager.get("browser_change_reverted_message"),
                     parent=self.root
                 )
-        else:  # Not a significant change, or just updating 'previous' after a successful change
+        else:
             self.previous_browser_choice.set(current_choice)
             file_logger.debug(
                 f"Browser choice changed from '{previous_choice}' to '{current_choice}', but not deemed significant for restart, or already handled. Previous choice updated.")
 
     def perform_restart(self):
-        # ... (perform_restart code remains largely the same)
         file_logger.info("--- Application restart sequence initiated by user for browser setting change. ---")
 
         if self.agent_thread and self.agent_thread.is_alive():
@@ -742,12 +816,11 @@ class AgentApp:
             os.execv(python_executable, [python_executable] + script_args)
         except Exception as e_exec:
             file_logger.critical(f"FATAL: os.execv failed during restart: {e_exec}")
-            # Create a temporary Tk root for messagebox if main root is destroyed
             temp_root_for_error = tk.Tk()
             temp_root_for_error.withdraw()
             messagebox.showerror("Restart Failed",
                                  f"Could not automatically restart the application: {e_exec}. Please close and restart manually.",
-                                 parent=temp_root_for_error)  # Use parent=None or temp_root_for_error
+                                 parent=temp_root_for_error)
             temp_root_for_error.destroy()
             sys.exit(1)
 
@@ -755,13 +828,10 @@ class AgentApp:
         new_lang = self.language_var.get()
         if new_lang != lang_manager.current_lang_code:
             lang_manager.set_language(new_lang)
-            self.update_ui_text()  # This implies UI text needs to be reloaded
-            # Setting is saved via save_app_settings_to_config on exit or restart
+            self.update_ui_text()
             file_logger.info(f"GUI: Language changed to {new_lang}. Preference will be saved on exit/restart.")
 
-    # ... (Other AgentApp methods like log_message_to_gui, add_saved_file_to_list, choose_output_dir, etc. remain)
     def log_message_to_gui(self, message_key_or_direct_msg, level="INFO_GUI", **kwargs):
-        # ... (no changes needed)
         if lang_manager.strings.get(message_key_or_direct_msg):
             message = lang_manager.get(message_key_or_direct_msg, **kwargs)
         else:
@@ -769,7 +839,7 @@ class AgentApp:
             if kwargs:
                 try:
                     message = message.format(**kwargs)
-                except:
+                except:  # pylint: disable=bare-except
                     pass
 
         display_message = f"{datetime.now().strftime('%H:%M:%S')} - {message}"
@@ -779,7 +849,6 @@ class AgentApp:
         self.log_text.see(tk.END)
 
     def add_saved_file_to_list(self, file_path):
-        # ... (no changes needed)
         abs_file_path = os.path.abspath(file_path)
         if abs_file_path not in self.saved_files_data:
             self.saved_files_data.append(abs_file_path)
@@ -787,7 +856,6 @@ class AgentApp:
             file_logger.debug(f"GUI: Added to saved files list: {abs_file_path}")
 
     def choose_output_dir(self):
-        # ... (no changes needed)
         directory = filedialog.askdirectory(initialdir=self.output_dir_var.get(),
                                             title=lang_manager.get("choose_output_dir_title"))
         if directory:
@@ -796,7 +864,6 @@ class AgentApp:
             file_logger.info(f"GUI: Output directory changed to: {abs_dir}")
 
     def choose_chrome_path(self):
-        # ... (no changes needed)
         initial_dir_guess = os.path.dirname(self.chrome_path_var.get()) if self.chrome_path_var.get() else ""
         if not os.path.isdir(initial_dir_guess):
             if platform.system() == "Windows":
@@ -813,30 +880,27 @@ class AgentApp:
         if platform.system() == "Windows":
             filetypes = ((exe_desc, "*.exe"), (all_desc, "*.*"))
         elif platform.system() == "Darwin":
-            filetypes = ((app_desc, "*.app"), (all_desc, "*.*"))  # Allow selecting .app bundle
-        else:  # Linux & others
-            filetypes = ((all_desc, "*.*"),)  # Executables often have no extension
+            filetypes = ((app_desc, "*.app"), (all_desc, "*.*"))
+        else:
+            filetypes = ((all_desc, "*.*"),)
 
         filepath = filedialog.askopenfilename(title=lang_manager.get("choose_chrome_exe_title"),
                                               initialdir=initial_dir_guess, filetypes=filetypes)
         if filepath:
             processed_path = os.path.abspath(filepath)
-            # On macOS, if user selects .app, try to find the actual executable inside
             if platform.system() == "Darwin" and processed_path.endswith(".app"):
-                # Common pattern: Google Chrome.app/Contents/MacOS/Google Chrome
                 app_name = os.path.basename(processed_path).replace(".app", "")
                 potential_exec = os.path.join(processed_path, "Contents/MacOS", app_name)
                 if os.path.isfile(potential_exec) and os.access(potential_exec, os.X_OK):
                     processed_path = potential_exec
                     file_logger.info(f"GUI: Resolved .app bundle to executable: {processed_path}")
                 else:
-                    # Try to find any executable in Contents/MacOS
                     macos_dir = os.path.join(processed_path, "Contents/MacOS")
                     if os.path.isdir(macos_dir):
                         execs = [f for f in os.listdir(macos_dir) if
                                  not f.startswith('.') and os.access(os.path.join(macos_dir, f), os.X_OK)]
                         if execs:
-                            processed_path = os.path.join(macos_dir, execs[0])  # Take the first one
+                            processed_path = os.path.join(macos_dir, execs[0])
                             file_logger.info(
                                 f"GUI: Resolved .app bundle to first executable in MacOS dir: {processed_path}")
                         else:
@@ -849,16 +913,14 @@ class AgentApp:
             self.chrome_path_var.set(processed_path)
             file_logger.info(f"GUI: Chrome path changed to: {processed_path}")
 
-            # If path is set, and radio is not 'custom', switch to 'custom' and trigger change logic
             if self.browser_choice_var.get() != "custom":
                 self.browser_choice_var.set("custom")
-                self.on_browser_choice_changed()  # This will handle state update and restart prompt if needed
-            else:  # Already custom, just update state (in case it was disabled)
+                self.on_browser_choice_changed()
+            else:
                 self.update_browser_path_state()
-                self.previous_browser_choice.set("custom")  # Ensure this is up-to-date
+                self.previous_browser_choice.set("custom")
 
     def choose_browser_user_data_dir(self):
-        # ... (no changes needed)
         current_path = self.browser_user_data_dir_var.get()
         initial_dir_candidate = os.path.abspath(current_path) if current_path else os.getcwd()
 
@@ -872,7 +934,6 @@ class AgentApp:
             file_logger.info(f"GUI: Browser user data directory changed to: {abs_dir}")
 
     def update_browser_path_state(self):
-        # ... (no changes needed)
         if self.browser_choice_var.get() == "custom":
             self.chrome_path_entry.config(state='normal')
             self.browse_exe_button.config(state='normal')
@@ -882,10 +943,9 @@ class AgentApp:
         file_logger.debug(f"GUI: Browser path state updated for choice: {self.browser_choice_var.get()}")
 
     def open_output_directory_explorer(self):
-        # ... (no changes needed)
         output_dir = self.output_dir_var.get()
         if not output_dir or not os.path.isdir(output_dir):
-            output_dir_abs = os.path.abspath(INITIAL_OUTPUT_DIR)  # Use initial as fallback base
+            output_dir_abs = os.path.abspath(INITIAL_OUTPUT_DIR)
             if not os.path.isdir(output_dir_abs):
                 try:
                     os.makedirs(output_dir_abs, exist_ok=True)
@@ -894,7 +954,7 @@ class AgentApp:
                 except Exception as e_mkdir:
                     file_logger.error(
                         f"Failed to create fallback output directory {output_dir_abs}: {e_mkdir}. Using current working directory.")
-                    output_dir = os.getcwd()  # Last resort
+                    output_dir = os.getcwd()
             else:
                 output_dir = output_dir_abs
         else:
@@ -904,9 +964,9 @@ class AgentApp:
         try:
             if platform.system() == "Windows":
                 os.startfile(output_dir)
-            elif platform.system() == "Darwin":  # macOS
+            elif platform.system() == "Darwin":
                 subprocess.Popen(["open", output_dir])
-            else:  # Linux and other POSIX
+            else:
                 subprocess.Popen(["xdg-open", output_dir])
         except Exception as e:
             messagebox.showerror(lang_manager.get("message_error_title"),
@@ -915,7 +975,6 @@ class AgentApp:
             file_logger.error(f"Failed to open directory '{output_dir}' in explorer: {e}")
 
     def open_selected_file_directly(self, event=None):
-        # ... (no changes needed)
         selected_indices = self.files_listbox.curselection()
         if not selected_indices:
             messagebox.showinfo(lang_manager.get("message_info_title"), lang_manager.get("error_no_file_selected"),
@@ -954,7 +1013,6 @@ class AgentApp:
                 f"GUI: File not found when trying to open directly (path was '{file_path_to_open}'). It might have been moved or deleted.")
 
     def load_task_template(self):
-        # ... (no changes needed)
         txt_desc = lang_manager.get("filetype_text_files");
         all_desc = lang_manager.get("filetype_all_files")
         filepath = filedialog.askopenfilename(title=lang_manager.get("load_task_template_title"),
@@ -962,7 +1020,8 @@ class AgentApp:
                                               filetypes=((txt_desc, "*.txt"), (all_desc, "*.*")), parent=self.root)
         if filepath:
             try:
-                with open(filepath, 'r', encoding='utf-f8-sig') as f:
+                # FIX 2: Correct encoding name from 'utf-f8-sig' to 'utf-8-sig'
+                with open(filepath, 'r', encoding='utf-8-sig') as f:
                     content = f.read()
                 self.task_text.delete("1.0", tk.END);
                 self.task_text.insert("1.0", content)
@@ -974,7 +1033,6 @@ class AgentApp:
                 file_logger.error(f"GUI: Error loading task template from '{filepath}': {e}")
 
     def save_task_template(self):
-        # ... (no changes needed)
         current_task_content = self.task_text.get("1.0", tk.END).strip()
         if not current_task_content:
             messagebox.showwarning(lang_manager.get("message_warning_title"),
@@ -1000,7 +1058,7 @@ class AgentApp:
                 file_logger.error(f"GUI: Error saving task template to '{filepath}': {e}")
 
     def set_current_task_as_default(self):
-        global INITIAL_TASK_PROMPT  # Still need to update this global for current session consistency if changed
+        global INITIAL_TASK_PROMPT
         current_task_content = self.task_text.get("1.0", tk.END).strip()
         if not current_task_content:
             messagebox.showwarning(lang_manager.get("message_warning_title"),
@@ -1010,10 +1068,9 @@ class AgentApp:
                                    lang_manager.get("confirm_set_default_task_message"), parent=self.root): return
 
         try:
-            # config_manager handles escaping internally in set_value for TASK_PROMPT
             config_manager.set_value('UI_DEFAULTS', 'TASK_PROMPT', current_task_content)
             if config_manager.save():
-                INITIAL_TASK_PROMPT = current_task_content  # Update in-memory global
+                INITIAL_TASK_PROMPT = current_task_content
                 msg_success_key = "msgbox_default_task_set_success"
                 self.log_message_to_gui(msg_success_key)
                 file_logger.info(
@@ -1031,24 +1088,12 @@ class AgentApp:
             file_logger.error(f"GUI: {msg_error}\n{traceback.format_exc()}")
 
     def save_app_settings_to_config(self, force_save_browser_choice=False):
-        # No global config object needed, use config_manager
         file_logger.info(f"Attempting to save application settings to '{config_manager.config_file_path}'.")
         try:
             config_manager.set_value('PATHS', 'CHROME_BINARY_PATH', self.chrome_path_var.get())
             config_manager.set_value('PATHS', 'OUTPUT_DIR', self.output_dir_var.get())
             config_manager.set_value('UI_DEFAULTS', 'LANGUAGE', lang_manager.current_lang_code)
 
-            # Browser choice saving logic
-            # When force_save_browser_choice is True (e.g., user confirmed restart), always save it.
-            # When force_save_browser_choice is False (e.g., normal exit),
-            # only save it if it differs from what's currently in config_manager.config
-            # to avoid overwriting a choice made in a concurrent session or if the app
-            # started with a different value than the UI's current default.
-            # However, a simpler approach for normal exit might be to always save the current UI state.
-            # Let's stick to the logic implied from check_and_prompt_for_restart which uses force_save_browser_choice.
-            # On normal exit (force_save_browser_choice=False), we should save the current selection, as it's the user's last active state.
-
-            # Always save current browser choice, disable_security, keep_alive, user_data_dir from UI
             config_manager.set_value('BROWSER_ADVANCED_SETTINGS', 'BROWSER_CHOICE', self.browser_choice_var.get())
             config_manager.set_value('BROWSER_ADVANCED_SETTINGS', 'DISABLE_SECURITY',
                                      str(self.browser_disable_security_var.get()))
@@ -1062,7 +1107,6 @@ class AgentApp:
                 file_logger.info(f"Application settings successfully saved to '{config_manager.config_file_path}'.")
                 return True
             else:
-                # Error logged by config_manager.save()
                 return False
         except Exception as e:
             file_logger.error(
@@ -1070,7 +1114,6 @@ class AgentApp:
             return False
 
     def start_agent_task(self):
-        # ... (start_agent_task logic largely the same, but using current effective values)
         task = self.task_text.get("1.0", tk.END).strip()
         if not task:
             messagebox.showerror(lang_manager.get("message_error_title"), lang_manager.get("error_task_input_empty"),
@@ -1083,6 +1126,7 @@ class AgentApp:
         self.run_button.config(state='disabled');
         self.stop_button.config(state='normal')
         self.force_exit_button.config(state='normal')
+        self.optimize_prompt_button.config(state='disabled')
         self.log_text.configure(state='normal');
         self.log_text.delete('1.0', tk.END);
         self.log_text.configure(state='disabled')
@@ -1120,13 +1164,13 @@ class AgentApp:
             if not current_chrome_path_val_from_ui or not current_chrome_path_val_from_ui.strip():
                 file_logger.warning(
                     f"GUI Action: 'custom' browser selected, but Chrome path is empty or whitespace ('{current_chrome_path_val_from_ui}'). The agent will likely fall back to bundled browser.")
-                current_chrome_path = current_chrome_path_val_from_ui  # Pass it as is, agent logic handles empty path
+                current_chrome_path = current_chrome_path_val_from_ui
                 self.log_message_to_gui(lang_manager.get("warning_custom_browser_no_path_selected"),
                                         level="WARNING_GUI")
             elif not os.path.isfile(current_chrome_path_val_from_ui):
                 file_logger.error(
                     f"GUI Action: 'custom' browser selected, but path '{current_chrome_path_val_from_ui}' is not a valid file. Agent might fail or fallback.")
-                current_chrome_path = current_chrome_path_val_from_ui  # Pass it as is
+                current_chrome_path = current_chrome_path_val_from_ui
                 self.log_message_to_gui(
                     lang_manager.get("error_custom_chrome_path_not_file", path=current_chrome_path_val_from_ui),
                     level="ERROR_GUI")
@@ -1136,7 +1180,6 @@ class AgentApp:
 
         elif browser_choice_raw == "playwright_bundled":
             browser_choice_for_log = lang_manager.get("radio_playwright_bundled")
-            # current_chrome_path remains None as it's not used for bundled
 
         try:
             os.makedirs(current_output_dir, exist_ok=True)
@@ -1147,9 +1190,10 @@ class AgentApp:
             self.run_button.config(state='normal');
             self.stop_button.config(state='disabled');
             self.force_exit_button.config(state='normal')
+            self.optimize_prompt_button.config(state='normal')
             return
 
-        if current_browser_user_data_dir:  # Ensure UDD exists if specified, agent does this too but GUI can pre-check
+        if current_browser_user_data_dir:
             try:
                 os.makedirs(os.path.abspath(current_browser_user_data_dir), exist_ok=True)
             except Exception as e_mkdir_gui_udd:
@@ -1163,36 +1207,38 @@ class AgentApp:
         self.agent_thread = threading.Thread(
             target=self.run_async_task_in_thread,
             args=(task, current_api_key, current_base_url, current_default_model,
-                  current_chrome_path,  # This is correctly None if not custom or path not set for custom
+                  current_chrome_path,
                   current_output_dir, self.stop_event,
                   current_browser_disable_security,
                   current_browser_keep_alive,
                   current_browser_user_data_dir,
-                  browser_choice_for_log,  # For logging within agent run
-                  browser_choice_raw),  # actual choice for agent run logic
+                  browser_choice_for_log,
+                  browser_choice_raw),
             daemon=True
         )
         self.agent_thread.start()
 
     def request_stop_agent_task(self):
-        # ... (no changes needed)
         if self.agent_thread and self.agent_thread.is_alive():
             self.log_message_to_gui("gui_log_agent_stop_requested", level="WARNING_GUI")
             file_logger.warning("GUI: User requested agent stop.")
             self.stop_event.set()
             self.stop_button.config(state='disabled')
+            # Optimize button remains disabled until task fully completes/stops
         else:
             is_running = self.agent_thread and self.agent_thread.is_alive()
-            if not is_running and self.stop_button['state'] == 'normal':  # Stop pressed when it shouldn't be
+            if not is_running and self.stop_button['state'] == 'normal':
                 self.log_message_to_gui("gui_log_agent_stop_ignored_not_running", level="INFO_GUI")
                 file_logger.info(f"GUI: Stop request ignored as agent is not running. Resetting button states.")
                 self.run_button.config(state='normal')
                 self.stop_button.config(state='disabled')
                 self.force_exit_button.config(state='normal')
-            elif not is_running:  # Agent already stopped (e.g. completed or previously stopped)
+                self.optimize_prompt_button.config(state='normal')
+            elif not is_running:
                 self.log_message_to_gui("gui_log_agent_already_stopped", level="INFO_GUI")
                 file_logger.info(f"GUI: Agent is not currently running or already stopped.")
-                self.force_exit_button.config(state='normal')  # Ensure force exit is enabled
+                self.force_exit_button.config(state='normal')
+                self.optimize_prompt_button.config(state='normal')
 
     def on_closing(self):
         file_logger.info("--- GUI: Application closing sequence initiated. ---")
@@ -1203,22 +1249,14 @@ class AgentApp:
                 self.log_message_to_gui("gui_log_quit_requested_stopping_agent", level="IMPORTANT_GUI")
                 file_logger.warning("GUI: Quit confirmed by user while agent running. Signaling agent stop.")
                 self.stop_event.set()
-                # Settings are saved when the agent thread actually finishes or is stopped
-                # and the task_complete signal is processed or if app exits cleanly.
-                # Here, we just signal and destroy. If save is crucial, it happens on thread termination.
-                # However, typically GUI settings are saved by the GUI thread.
-                # For a forced quit like this, it's acceptable if some pending states aren't flushed if the
-                # agent doesn't stop immediately. The save_app_settings_to_config(force_save_browser_choice=False)
-                # will be called if the app exits cleanly after this.
                 file_logger.info("GUI: Proceeding with destroy after signaling stop to running agent.")
-                self.root.destroy()  # This will eventually lead to finally in mainloop
+                self.root.destroy()
             else:
                 file_logger.info("GUI: Quit cancelled by user; application remains open.")
-                return  # Do not proceed with closing
+                return
         else:
-            # Agent not running, safe to save settings and destroy
             self.save_app_settings_to_config(force_save_browser_choice=False)
-            self.root.destroy()  # This will eventually lead to finally in mainloop
+            self.root.destroy()
 
     def run_async_task_in_thread(self, task, api_key, base_url, model, chrome_path, output_dir, stop_event_ref,
                                  browser_disable_security_param,
@@ -1226,7 +1264,6 @@ class AgentApp:
                                  browser_user_data_dir_param,
                                  browser_choice_log_info_param,
                                  browser_choice_raw_param):
-        # ... (no changes needed)
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         file_logger.info(f"Async task thread started for task (first 50): '{task[:50]}...'")
@@ -1236,7 +1273,7 @@ class AgentApp:
                                 browser_disable_security=browser_disable_security_param,
                                 browser_keep_alive=browser_keep_alive_param,
                                 browser_user_data_dir=browser_user_data_dir_param,
-                                use_vision_param=False,  # Assuming this is fixed for now or configured elsewhere.
+                                use_vision_param=False,
                                 browser_choice_info=browser_choice_log_info_param,
                                 actual_browser_choice=browser_choice_raw_param))
         except Exception as e:
@@ -1245,17 +1282,18 @@ class AgentApp:
                                                     error_msg=str(e)[:100])
             gui_feedback_queue.put({"type": "log", "message": critical_msg_summary, "level": "ERROR_GUI", "kwargs": {}})
             file_logger.critical(f"CRITICAL ERROR in run_async_task_in_thread's run_until_complete: {e}\n{tb_str}")
+            # FIX 1 Cont: Make sure "error" key is sent
             gui_feedback_queue.put({"type": "task_complete", "stopped_by_user": stop_event_ref.is_set(), "error": True})
         finally:
             try:
-                all_async_tasks = asyncio.all_tasks(loop)  # Renamed task variable
+                all_async_tasks = asyncio.all_tasks(loop)
                 pending = [t for t in all_async_tasks if not t.done()]
                 if pending:
                     file_logger.debug(f"Async thread: Cancelling {len(pending)} pending asyncio tasks.")
-                    for t_item in pending: t_item.cancel()  # Renamed t to t_item
+                    for t_item in pending: t_item.cancel()
                     loop.run_until_complete(asyncio.gather(*pending, return_exceptions=True))
                 loop.run_until_complete(asyncio.sleep(0.1))  # type: ignore[arg-type]
-            except RuntimeError as e_runtime:  # Handle if loop is already closed
+            except RuntimeError as e_runtime:
                 file_logger.error(f"Async thread: Runtime error during task cleanup in event loop: {e_runtime}")
             except Exception as eloop_clean:
                 file_logger.error(f"Async thread: Exception during task cleanup in event loop: {eloop_clean}")
@@ -1267,7 +1305,6 @@ class AgentApp:
                     file_logger.info(f"Async task thread event loop was already closed.")
 
     def process_gui_queue(self):
-        # ... (no changes needed)
         try:
             while True:
                 message_item = gui_feedback_queue.get_nowait()
@@ -1277,7 +1314,7 @@ class AgentApp:
                 msg_kwargs = message_item.get("kwargs", {})
 
                 processed_message = ""
-                if lang_manager.strings.get(str(msg_content_key_or_direct)):  # Ensure key is string
+                if lang_manager.strings.get(str(msg_content_key_or_direct)):
                     processed_message = lang_manager.get(str(msg_content_key_or_direct), **msg_kwargs)
                 else:
                     processed_message = str(msg_content_key_or_direct)
@@ -1287,34 +1324,51 @@ class AgentApp:
                         except (KeyError, IndexError, TypeError, ValueError):
                             file_logger.warning(
                                 f"GUI Queue: Failed to format direct message '{msg_content_key_or_direct}' with kwargs {msg_kwargs}. Using raw message.")
-                            pass  # Use raw message
+                            pass
 
                 log_prefix_queue = f"Q->GUI ({msg_level})"
                 if "ERROR" in msg_level:
                     file_logger.error(f"{log_prefix_queue}: {processed_message}")
                 elif "WARNING" in msg_level:
                     file_logger.warning(f"{log_prefix_queue}: {processed_message}")
-                elif msg_type == "log":  # Don't log all Q messages, only actual log types
+                elif msg_type == "log":
                     file_logger.info(f"{log_prefix_queue}: {processed_message}")
 
                 if msg_type == "log":
-                    # Define which levels actually get displayed on the GUI log widget
                     gui_display_levels = ["INFO_GUI", "ACTION_GUI", "WARNING_GUI", "ERROR_GUI", "IMPORTANT_GUI"]
-                    if msg_level in gui_display_levels:  # Filter which messages appear in GUI log
-                        self.log_message_to_gui(processed_message, level=msg_level)  # Pass processed_message directly
+                    if msg_level in gui_display_levels:
+                        self.log_message_to_gui(processed_message, level=msg_level)
                 elif msg_type == "file_saved":
                     self.add_saved_file_to_list(message_item["path"])
+                elif msg_type == "prompt_optimization_result":
+                    self.optimize_prompt_button.config(state='normal')
+                    if message_item["status"] == "success":
+                        optimized_prompt = message_item["optimized_prompt"]
+                        self.task_text.delete("1.0", tk.END)
+                        self.task_text.insert("1.0", optimized_prompt)
+                        self.log_message_to_gui("gui_log_prompt_optimized_success", level="INFO_GUI")
+                        messagebox.showinfo(lang_manager.get("message_success_title"),
+                                            lang_manager.get("gui_log_prompt_optimized_success"), parent=self.root)
+                    else:
+                        error_msg = message_item["error_message"]
+                        self.log_message_to_gui("gui_log_prompt_optimization_failed", error=error_msg,
+                                                level="ERROR_GUI")
+                        messagebox.showerror(lang_manager.get("message_error_title"),
+                                             lang_manager.get("gui_log_prompt_optimization_failed", error=error_msg),
+                                             parent=self.root)
                 elif msg_type == "task_complete":
-                    self.run_button.config(state='normal');
+                    self.run_button.config(state='normal')
                     self.stop_button.config(state='disabled')
                     self.force_exit_button.config(state='normal')
+                    self.optimize_prompt_button.config(state='normal')
 
                     stopped_by_user = message_item.get("stopped_by_user", False)
-                    had_critical_error = message_item.get("error", False)  # From thread exception
+                    # FIX 1 Cont.: Check for "error" key specifically.
+                    had_critical_error = message_item.get("error", False)
 
                     title_key = "message_info_title"
                     completion_msg_key_gui = "msgbox_agent_task_complete"
-                    log_level_for_gui_msg = "INFO_GUI"  # For logging the completion status to GUI
+                    log_level_for_gui_msg = "INFO_GUI"
 
                     if had_critical_error:
                         title_key = "message_error_title"
@@ -1328,23 +1382,30 @@ class AgentApp:
                         log_level_for_gui_msg = "WARNING_GUI"
                         messagebox.showwarning(lang_manager.get(title_key), lang_manager.get(completion_msg_key_gui),
                                                parent=self.root)
-                    else:  # Success
+                    else:  # Successful completion without user stop
                         messagebox.showinfo(lang_manager.get(title_key), lang_manager.get(completion_msg_key_gui),
                                             parent=self.root)
 
                     self.log_message_to_gui(lang_manager.get(completion_msg_key_gui), level=log_level_for_gui_msg)
                     file_logger.info(
-                        f"GUI: Task complete signal processed. Final status perceived by GUI: {lang_manager.get(completion_msg_key_gui)}")
+                        f"GUI: Task complete signal processed. Final status perceived by GUI (keys): had_error={had_critical_error}, stopped_by_user={stopped_by_user} -> {lang_manager.get(completion_msg_key_gui)}")
 
         except queue.Empty:
-            pass  # Normal case, no message in queue
-        except Exception as e_queue:  # Catch any other errors in queue processing
-            # Log to GUI if possible, definitely to file
+            pass
+        except Exception as e_queue:
             error_msg = f"Error in process_gui_queue: {type(e_queue).__name__} - {e_queue}"
             self.log_message_to_gui(error_msg, level="ERROR_GUI")  # Log to GUI if possible
-            file_logger.critical(f"{error_msg}\n{traceback.format_exc()}")  # Log to file
+            file_logger.critical(f"{error_msg}\n{traceback.format_exc()}")  # Definitely log to file
+            # Attempt to reset buttons to a safe state if GUI queue processing itself fails catastrophically
+            try:
+                if self.run_button and self.run_button.winfo_exists(): self.run_button.config(state='normal')
+                if self.stop_button and self.stop_button.winfo_exists(): self.stop_button.config(state='disabled')
+                if self.optimize_prompt_button and self.optimize_prompt_button.winfo_exists(): self.optimize_prompt_button.config(
+                    state='normal')
+            except Exception as e_reset:
+                file_logger.error(f"Failed to reset buttons during GUI queue error handling: {e_reset}")
         finally:
-            if self.root.winfo_exists():  # Check if root window still exists
+            if self.root.winfo_exists():
                 self.root.after(100, self.process_gui_queue)
 
 
@@ -1355,7 +1416,7 @@ if __name__ == "__main__":
     os.makedirs(LOCALES_DIR, exist_ok=True)
     file_logger.info(f"Locales directory ensured: {os.path.abspath(LOCALES_DIR)}")
 
-    try:  # Ensure default browser user data dir base path exists (ConfigManager might use it as a default)
+    try:
         abs_default_udd = os.path.abspath(DEFAULT_BROWSER_USER_DATA_DIR)
         os.makedirs(abs_default_udd, exist_ok=True)
         file_logger.info(f"Default browser user data directory base ensured: {abs_default_udd}")
@@ -1374,7 +1435,6 @@ if __name__ == "__main__":
         if not can_access_internal_service(ENTERPRISE_NETWORK_CHECK_HOST, ENTERPRISE_NETWORK_CHECK_PORT):
             file_logger.warning(
                 "Enterprise user detected, but not on the enterprise network (or host not configured/resolvable).")
-            # Create temporary Tk root for messagebox if main app isn't up yet
             temp_root_for_mb = tk.Tk();
             temp_root_for_mb.withdraw()
             messagebox.showwarning(lang_manager.get("network_access_warning_title"),
@@ -1388,7 +1448,7 @@ if __name__ == "__main__":
 
     if perform_exit:
         file_logger.info("Exiting application due to enterprise network check failure or user cancellation.")
-        sys.exit(1)  # Exit before starting full GUI
+        sys.exit(1)
 
     status_default_loc = lang_manager.get("status_default")
     status_yes_custom_loc = lang_manager.get("status_yes_custom")
@@ -1413,12 +1473,12 @@ if __name__ == "__main__":
     print("-" * 30 + " Initial Configuration " + "-" * 30)
     for line in console_output:
         print(line)
-        # Log sensitive data like API keys only if necessary for debugging and ensure logs are secure
-        # For now, we log the "Loaded" status, not the key itself.
-        if "API Key Loaded" not in line:  # Avoid logging the key status line twice if already specific
+        if "API Key Loaded" not in line:  # Avoid double logging API key status here
             file_logger.info(line)
+    # Log API key status to file once, clearly
     file_logger.info(
-        f"Initial Effective Config - OpenAI API Key Loaded: {status_yes_custom_loc if OPENAI_API_KEY_EFFECTIVE and OPENAI_API_KEY_EFFECTIVE != DEFAULT_OPENAI_API_KEY else status_default_loc}")  # Log API Key status explicitly
+        f"Initial Effective Config - OpenAI API Key Loaded: {status_yes_custom_loc if OPENAI_API_KEY_EFFECTIVE and OPENAI_API_KEY_EFFECTIVE != DEFAULT_OPENAI_API_KEY else status_default_loc}")
+
     print("-" * (60 + len(" Initial Configuration ")))
 
     main_root = tk.Tk()
@@ -1428,3 +1488,20 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         file_logger.info("Application terminated by KeyboardInterrupt.")
         print("\nApplication terminated by user.")
+    finally:
+        if app and hasattr(app, 'root') and app.root.winfo_exists():  # Check if app and its root window exist
+            file_logger.info("Mainloop exited, attempting final settings save if not already handled by on_closing.")
+            app.save_app_settings_to_config(force_save_browser_choice=False)
+
+        logging.shutdown()  # Flush and close all handlers
+        file_logger.info("==================== Application Exited ====================")
+        # Ensure the file handler is explicitly closed if it was the last one for file_logger
+        # Note: logging.shutdown() should handle this, but explicit close can be a safeguard
+        for handler in list(file_logger.handlers):  # Iterate over a copy as handlers might be removed
+            if isinstance(handler, logging.FileHandler):
+                try:
+                    handler.close()
+                    # Optionally remove handler from logger if shutdown didn't.
+                    # file_logger.removeHandler(handler) # Usually not needed after shutdown
+                except Exception as e_close:
+                    print(f"Error closing file handler during final shutdown: {e_close}", file=sys.stderr)

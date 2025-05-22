@@ -30,6 +30,9 @@
     "button_load_template": "Load Template",
     "button_save_template": "Save as Template",
     "button_set_default_task": "Set as Default Template",
+    "button_optimize_prompt": "AI Optimize Prompt",
+    "gui_log_prompt_optimized_success": "AI optimized prompt successfully.",
+    "gui_log_prompt_optimization_failed": "AI prompt optimization failed: {error}",
     "checkbox_close_browser_after_task": "Close browser after task completion",
     "button_run_agent": "Run Agent",
     "button_stop_agent": "Stop Agent",
@@ -129,6 +132,7 @@
     "status_default": "Default/Placeholder",
     "status_yes_custom": "Yes (custom/from file)",
     "language_display_name": "English",
-    "welcome_message": "Welcome, {name}!"
+    "warning_prompt_empty_no_optimize": "Task input is empty. Cannot optimize.",
+    "gui_log_optimizing_prompt":  "Optimizing prompt..."
 
 }

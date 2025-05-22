@@ -35,6 +35,9 @@
     "button_load_template": "加载模板",
     "button_save_template": "保存模板",
     "button_set_default_task": "设为默认模板",
+    "button_optimize_prompt": "AI优化指令",
+    "gui_log_prompt_optimized_success": "AI优化指令成功。",
+    "gui_log_prompt_optimization_failed": "AI优化指令失败: {error}",
     "checkbox_close_browser_after_task": "任务完成后关闭浏览器",
     "button_run_agent": "运行 Agent",
     "button_stop_agent": "停止 Agent",
@@ -134,5 +137,6 @@
     "status_default": "默认/占位符",
     "status_yes_custom": "是 (自定义/来自文件)",
     "language_display_name": "中文",
-    "welcome_message": "欢迎, {name}!"
+    "warning_prompt_empty_no_optimize": "任务输入为空，无法优化。",
+    "gui_log_optimizing_prompt": "正在优化任务输入..."
 }
