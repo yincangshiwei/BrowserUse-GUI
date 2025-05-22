@@ -1,6 +1,4 @@
 # main.py
-from typing import List
-
 from langchain_openai import ChatOpenAI
 from browser_use import Agent, Browser, BrowserConfig, Controller  # Assuming BrowserConfig handles new args
 import asyncio
@@ -21,9 +19,6 @@ from tkinter import ttk, filedialog, messagebox, scrolledtext, Menu
 # ----------- Action 相关代码全部在 action.py -------------
 from actions import register_actions, extend_system_message
 
-# ----------- Localization Import -----------
-from localization import LanguageManager
-
 # ----------- ConfigTool Import -----------
 from ConfigTool import ConfigManager, CONFIG_FILE_NAME
 from ConfigTool import (
@@ -34,11 +29,11 @@ from ConfigTool import (
     DEFAULT_BROWSER_KEEP_ALIVE, DEFAULT_BROWSER_USER_DATA_DIR
 )
 from tool import can_access_internal_service
+from init import LOG_FILENAME
 
 # ----------- Global constants ------------
 TASK_TEMPLATE_DIR = "resources/task_template"
 LOCALES_DIR = "resources/locales"
-LOG_FILENAME = "app.log"
 
 # --- File Logger Setup ---
 file_logger = logging.getLogger('AgentAppFileLogger')
@@ -51,6 +46,9 @@ if not file_logger.hasHandlers():
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
     fh.setFormatter(formatter)
     file_logger.addHandler(fh)
+
+# ----------- Localization Import -----------
+from localization import LanguageManager
 # --- End File Logger Setup ---
 
 # ---- NEW USER SETTINGS DEFAULTS ----
@@ -84,7 +82,6 @@ INITIAL_BROWSER_KEEP_ALIVE = config_manager.get_value('BROWSER_ADVANCED_SETTINGS
                                                       DEFAULT_BROWSER_KEEP_ALIVE, is_bool=True)
 INITIAL_BROWSER_USER_DATA_DIR = config_manager.get_value('BROWSER_ADVANCED_SETTINGS', 'USER_DATA_DIR',
                                                          DEFAULT_BROWSER_USER_DATA_DIR)
-
 
 # --- Configuration END ---
 

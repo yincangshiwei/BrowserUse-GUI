@@ -8,7 +8,7 @@
     "menu_language": "Language",
     "lang_en": "English",
     "lang_zh": "中文",
-
+    "status_not_set": "Not Set",
     "frame_general_config": "General Configuration",
     "label_output_directory": "Output Directory:",
     "button_choose_dir": "Browse...",
@@ -126,10 +126,9 @@
     "action_log_pdf_processed_summary": "PDF '{filename}' content processed: {reply_summary}...",
     "error_context_main_agent_error": "Agent error: {error_summary}",
     "error_context_agent_stop_requested": "Agent stop requested",
-    "status_default",: "Default/Placeholder",
+    "status_default": "Default/Placeholder",
     "status_yes_custom": "Yes (custom/from file)",
     "language_display_name": "English",
-    "app_title": "My Awesome Agent App",
     "welcome_message": "Welcome, {name}!"
 
 }

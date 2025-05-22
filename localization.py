@@ -7,6 +7,7 @@
 import json
 import os
 import logging
+from init import LOG_FILENAME
 
 # Use the main application's file logger if available, otherwise a local one.
 # This assumes file_logger is globally accessible from main.py or configured early.
@@ -15,13 +16,22 @@ try:
 except ImportError:
     # Fallback logger if main.file_logger is not available during standalone import
     # or if structure changes. For this setup, main.py will initialize it.
+
+    # --- File Logger Setup ---
     file_logger = logging.getLogger('LocalizationManager')
-    if not file_logger.hasHandlers(): # Basic setup if not configured
-        handler = logging.StreamHandler()
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        handler.setFormatter(formatter)
-        file_logger.addHandler(handler)
-        file_logger.setLevel(logging.INFO)
+    file_logger.setLevel(logging.INFO)
+    file_logger.propagate = False
+
+    if not file_logger.hasHandlers():
+        fh = logging.FileHandler(LOG_FILENAME, encoding='utf-8', mode='a')
+        fh.setLevel(logging.INFO)
+        stream_handler = logging.StreamHandler()
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                                      datefmt='%Y-%m-%d %H:%M:%S')
+        fh.setFormatter(formatter)
+        stream_handler.setFormatter(formatter)
+        file_logger.addHandler(fh)
+        file_logger.addHandler(stream_handler)
 
 class LanguageManager:
     def __init__(self, locales_dir="resources/locales", initial_lang="en", fallback_lang="en"):
@@ -150,3 +160,7 @@ class LanguageManager:
 
         file_logger.info(f"LanguageManager: Discovered available languages: {available_languages}")
         return available_languages
+
+if __name__ == '__main__':
+    lang_manager = LanguageManager(locales_dir="resources/locales", initial_lang="en", fallback_lang="en")
+    print(lang_manager.get("app_title"))

@@ -8,7 +8,7 @@
     "menu_language": "语言",
     "lang_en": "English",
     "lang_zh": "中文",
-
+    "status_not_set": "未设置",
     "frame_general_config": "常规配置",
     "label_output_directory": "输出目录:",
     "button_choose_dir": "浏览...",
@@ -134,6 +134,5 @@
     "status_default": "默认/占位符",
     "status_yes_custom": "是 (自定义/来自文件)",
     "language_display_name": "中文",
-    "app_title": "我的智能代理应用",
     "welcome_message": "欢迎, {name}!"
 }
