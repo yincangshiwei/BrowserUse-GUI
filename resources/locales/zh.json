@@ -40,7 +40,7 @@
     "button_stop_agent": "停止 Agent",
     "button_force_exit": "强制退出",
     "confirm_force_exit_title": "强制退出",
-    "confirm_force_exit_message": "是否强制退出程序？",
+    "confirm_force_exit_message": "请确定是否已保存模板？",
     "gui_log_force_exit_initiated": "强制退出已启动。",
     "gui_log_force_exit_cancelled": "强制退出已取消。",
     "frame_operation_log": "操作日志 (关键事件)",

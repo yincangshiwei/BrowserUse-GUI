@@ -29,26 +29,17 @@ from ConfigTool import (
     DEFAULT_BROWSER_KEEP_ALIVE, DEFAULT_BROWSER_USER_DATA_DIR
 )
 from tool import can_access_internal_service
-from init import LOG_FILENAME
+from LogTool import LogTool
+# ----------- Localization Import -----------
+from localization import LanguageManager
 
 # ----------- Global constants ------------
 TASK_TEMPLATE_DIR = "resources/task_template"
 LOCALES_DIR = "resources/locales"
+LOG_FILENAME = "app.log"
 
 # --- File Logger Setup ---
-file_logger = logging.getLogger('AgentAppFileLogger')
-file_logger.setLevel(logging.DEBUG)
-file_logger.propagate = False
-
-if not file_logger.hasHandlers():
-    fh = logging.FileHandler(LOG_FILENAME, encoding='utf-8', mode='a')
-    fh.setLevel(logging.DEBUG)
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
-    fh.setFormatter(formatter)
-    file_logger.addHandler(fh)
-
-# ----------- Localization Import -----------
-from localization import LanguageManager
+file_logger = LogTool(name='AgentAppFileLogger', to_file=True, to_stream=True).init_logger()
 # --- End File Logger Setup ---
 
 # ---- NEW USER SETTINGS DEFAULTS ----
@@ -1438,17 +1429,3 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         file_logger.info("Application terminated by KeyboardInterrupt.")
         print("\nApplication terminated by user.")
-    # The on_closing method should handle saving settings if app is closed via window 'X'
-    # If terminated by Ctrl+C, save_app_settings_to_config might not be called unless caught gracefully by mainloop's end.
-    # A try/finally around main_root.mainloop() for settings save can be an additional safeguard.
-    finally:
-        if app and main_root.winfo_exists():  # If app instance exists and window wasn't destroyed by on_closing
-            file_logger.info("Mainloop exited, attempting final settings save if not already handled by on_closing.")
-            app.save_app_settings_to_config(force_save_browser_choice=False)
-
-        logging.shutdown()  # Flush and close all handlers
-        file_logger.info("==================== Application Exited ====================")
-        # Ensure the file handler is explicitly closed if it was the last one for file_logger
-        for handler in file_logger.handlers:
-            if isinstance(handler, logging.FileHandler):
-                handler.close()

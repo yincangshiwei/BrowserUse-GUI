@@ -35,7 +35,7 @@
     "button_stop_agent": "Stop Agent",
     "button_force_exit": "Force Exit",
     "confirm_force_exit_title": "Force Exit",
-    "confirm_force_exit_message": "Force exit now?" ,
+    "confirm_force_exit_message": "Please confirm if the template has been saved?" ,
     "gui_log_force_exit_initiated": "Force exit initiated.",
     "gui_log_force_exit_cancelled": "Force exit cancelled.",
     "frame_operation_log": "Operation Log (Key Events)",

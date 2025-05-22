@@ -7,31 +7,10 @@
 import json
 import os
 import logging
-from init import LOG_FILENAME
+from LogTool import LogTool
 
-# Use the main application's file logger if available, otherwise a local one.
-# This assumes file_logger is globally accessible from main.py or configured early.
-try:
-    from main import file_logger # Try to import from main
-except ImportError:
-    # Fallback logger if main.file_logger is not available during standalone import
-    # or if structure changes. For this setup, main.py will initialize it.
+file_logger = LogTool(name='LocalizationManager', to_file=True, to_stream=True).init_logger()
 
-    # --- File Logger Setup ---
-    file_logger = logging.getLogger('LocalizationManager')
-    file_logger.setLevel(logging.INFO)
-    file_logger.propagate = False
-
-    if not file_logger.hasHandlers():
-        fh = logging.FileHandler(LOG_FILENAME, encoding='utf-8', mode='a')
-        fh.setLevel(logging.INFO)
-        stream_handler = logging.StreamHandler()
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                                      datefmt='%Y-%m-%d %H:%M:%S')
-        fh.setFormatter(formatter)
-        stream_handler.setFormatter(formatter)
-        file_logger.addHandler(fh)
-        file_logger.addHandler(stream_handler)
 
 class LanguageManager:
     def __init__(self, locales_dir="resources/locales", initial_lang="en", fallback_lang="en"):
