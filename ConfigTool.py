@@ -135,7 +135,7 @@ class ConfigManager:
                 # 如果指定了 treat_empty_as_default 且值为空字符串 (去除首尾空格后)，则使用默认值
                 if treat_empty_as_default and not value_str.strip():
                     self.logger.warning(
-                        f"Key '{key_name}' in section '{section_name}' is empty and 'treat_empty_as_default' is True. Using default: '{str(default_value)[:50]}{'...' if len(str(default_value)) > 50 else ''}'.")
+                        f"Key '{key_name}' in section '{section_name}' is empty and 'treat_empty_as_default' is True. Using default: '{str(default_value)[:40]}{'...' if len(str(default_value)) > 50 else ''}'.")
                     return default_value
 
                 if is_bool:

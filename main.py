@@ -431,6 +431,7 @@ class OpenAIConfigDialog(tk.Toplevel):
 
 # --- Tkinter GUI Application ---
 class AgentApp:
+
     def __init__(self, root):
         self.root = root
         root.geometry("1000x850")
@@ -459,6 +460,12 @@ class AgentApp:
         self.process_gui_queue()
         self.update_browser_path_state()
         self.previous_browser_choice.set(self.browser_choice_var.get())
+        LogTool(name='browser_use.agent.service', to_file=True, to_stream=True, listener=self.agent_log_listener).init_logger()
+
+    def agent_log_listener(self, record: logging.LogRecord):
+        #print('监听: ', record.getMessage())  # 实际应用可以推送到队列、数据库等
+        self.log_message_to_gui(record.getMessage(), level="INFO_GUI")
+
 
     def build_ui(self):
         self.menubar = Menu(self.root)
