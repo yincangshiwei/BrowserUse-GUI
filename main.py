@@ -15,7 +15,7 @@ from datetime import datetime  # For timestamping GUI messages
 
 # --- Tkinter specific imports ---
 import tkinter as tk
-from tkinter import ttk, filedialog, messagebox, scrolledtext, Menu
+from tkinter import ttk, filedialog, messagebox, scrolledtext, Menu, font as tkFont  # Added tkFont
 
 # ----------- Action 相关代码全部在 action.py -------------
 from actions import register_actions, extend_system_message
@@ -222,7 +222,7 @@ async def run_agent_async(task_text, openai_api_key, openai_base_url, openai_mod
         if stop_event.is_set():
             log_to_gui("agent_log_cancelled_before_agent_init", "WARNING_GUI")
             file_logger.warning("Agent run cancelled before agent initialization (due to stop request)")
-            gui_feedback_queue.put({"type": "task_complete", "stopped_by_user": True, "error": False})  # FIX 1 Cont.
+            gui_feedback_queue.put({"type": "task_complete", "stopped_by_user": True, "error": False})
             if browser_instance: await browser_instance.close()
             return
 
@@ -240,7 +240,7 @@ async def run_agent_async(task_text, openai_api_key, openai_base_url, openai_mod
         file_logger.info("--- Agent core execution started. ---")
         result = await agent.run()
         file_logger.info("--- Agent core execution finished. ---")
-        task_completed_successfully_flag = True  # Mark as successful up to this point
+        task_completed_successfully_flag = True
 
         if stop_event.is_set():
             log_to_gui("agent_log_task_completed_stop_requested", level="WARNING_GUI")
@@ -254,7 +254,6 @@ async def run_agent_async(task_text, openai_api_key, openai_base_url, openai_mod
             file_logger.info(f"--- Agent Execution Result(final) ---:\n{result.final_result()}")
             log_to_gui("agent_log_check_output_dir", level="IMPORTANT_GUI", abs_output_dir=abs_output_dir)
 
-        # FIX 1: Ensure task_complete is sent for successful runs or runs completed with a stop request
         gui_feedback_queue.put({"type": "task_complete", "stopped_by_user": stop_event.is_set(), "error": False})
 
     except Exception as e:
@@ -271,22 +270,12 @@ async def run_agent_async(task_text, openai_api_key, openai_base_url, openai_mod
             del controller.current_output_dir_from_gui
             file_logger.debug("Cleaned up controller.current_output_dir_from_gui.")
 
-        # FIX 1 Cont.: Ensure task_complete is sent on error
         gui_feedback_queue.put({"type": "task_complete", "stopped_by_user": stop_event.is_set(), "error": True})
 
     finally:
         if browser_instance:
             await browser_instance.close()
             file_logger.info("Browser instance closed in run_agent_async finally block.")
-
-        # This was the old place that missed successful completion scenarios
-        # if not task_completed_successfully_flag and not stop_event.is_set(): # Check if already sent by try or except
-        #    # This specific scenario where it reaches finally due to non-exception, non-stop early exit
-        #    # is less likely with the current explicit returns, but good for robustness.
-        #    # However, if an error path did not send it, this might be a fallback.
-        #    # Given the explicit puts now, this might be redundant or cause double messages.
-        #    # Let's rely on the explicit puts in try/except/early_returns for now.
-        #    pass
 
         file_logger.info("Agent run_agent_async finished (successfully or with error).")
 
@@ -431,6 +420,15 @@ class OpenAIConfigDialog(tk.Toplevel):
 
 # --- Tkinter GUI Application ---
 class AgentApp:
+    # Define a dictionary for log levels and their corresponding tag names and colors
+    LOG_LEVEL_CONFIG = {
+        "INFO_GUI": {"tag": "info_log", "color": "black"},  # Or your theme's default text color
+        "ACTION_GUI": {"tag": "action_log", "color": "green"},
+        "WARNING_GUI": {"tag": "warning_log", "color": "darkorange"},
+        "ERROR_GUI": {"tag": "error_log", "color": "red"},
+        "IMPORTANT_GUI": {"tag": "important_log", "color": "blue"},  # Or "royalblue"
+        "AGENT_INTERNAL_LOG": {"tag": "agent_internal_log", "color": "purple"}  # New for agent listener
+    }
 
     def __init__(self, root):
         self.root = root
@@ -452,7 +450,7 @@ class AgentApp:
 
         self.saved_files_data = []
 
-        self.build_ui()
+        self.build_ui()  # build_ui will now call _configure_log_tags
         self.update_ui_text()
 
         self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
@@ -460,12 +458,28 @@ class AgentApp:
         self.process_gui_queue()
         self.update_browser_path_state()
         self.previous_browser_choice.set(self.browser_choice_var.get())
-        LogTool(name='browser_use.agent.service', to_file=True, to_stream=True, listener=self.agent_log_listener).init_logger()
+        LogTool(name='browser_use.agent.service', to_file=True, to_stream=True,
+                listener=self.agent_log_listener).init_logger()
+
+    def _configure_log_tags(self):
+        """Configure tags for colored logging in self.log_text."""
+        default_font = tkFont.nametofont("TkDefaultFont").actual()
+
+        for level_config in self.LOG_LEVEL_CONFIG.values():
+            tag_name = level_config["tag"]
+            color = level_config["color"]
+            font_config = (default_font['family'], default_font['size'])
+            if tag_name == "error_log" or tag_name == "important_log":
+                font_config = (default_font['family'], default_font['size'], 'bold')
+
+            self.log_text.tag_configure(tag_name, foreground=color, font=font_config)
+
+        # Example of a more specific tag if needed (e.g., just for timestamp)
+        # self.log_text.tag_configure("timestamp", foreground="gray", font=(default_font['family'], default_font['size']-1))
 
     def agent_log_listener(self, record: logging.LogRecord):
-        #print('监听: ', record.getMessage())  # 实际应用可以推送到队列、数据库等
-        self.log_message_to_gui(record.getMessage(), level="INFO_GUI")
-
+        # Pass a specific level for messages from this listener
+        self.log_message_to_gui(record.getMessage(), level="AGENT_INTERNAL_LOG")
 
     def build_ui(self):
         self.menubar = Menu(self.root)
@@ -544,10 +558,8 @@ class AgentApp:
         template_button_frame = ttk.Frame(self.task_frame_lframe)
         template_button_frame.pack(fill=tk.X, pady=(5, 5), padx=5)
 
-        # ---- NEW: AI Optimize Prompt Button ----
         self.optimize_prompt_button = ttk.Button(template_button_frame, command=self.optimize_task_prompt)
         self.optimize_prompt_button.pack(side=tk.LEFT, padx=(0, 5))
-        # ---- END NEW ----
 
         self.load_template_button = ttk.Button(template_button_frame, command=self.load_task_template)
         self.load_template_button.pack(side=tk.LEFT, padx=(0, 5))
@@ -577,6 +589,8 @@ class AgentApp:
         self.log_text = scrolledtext.ScrolledText(self.log_frame_lframe, wrap=tk.WORD, height=15, state='disabled',
                                                   relief=tk.SOLID, borderwidth=1)
         self.log_text.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+        # Configure tags for colored logging
+        self._configure_log_tags()  # MOVED here, after log_text is created
 
         self.files_frame_lframe = ttk.LabelFrame(self.bottom_paned_window)
         self.bottom_paned_window.add(self.files_frame_lframe, weight=1)
@@ -630,9 +644,7 @@ class AgentApp:
         self.browse_user_data_dir_button.config(text=lang_manager.get("button_browse_dir"))
 
         self.task_frame_lframe.config(text=lang_manager.get("frame_task_input"))
-        # ---- NEW: Update optimize prompt button text ----
         self.optimize_prompt_button.config(text=lang_manager.get("button_optimize_prompt"))
-        # ---- END NEW ----
         self.load_template_button.config(text=lang_manager.get("button_load_template"))
         self.save_template_button.config(text=lang_manager.get("button_save_template"))
         self.set_default_button.config(text=lang_manager.get("button_set_default_task"))
@@ -645,12 +657,9 @@ class AgentApp:
         self.open_file_button.config(text=lang_manager.get("button_open_selected_file"))
         self.open_dir_button.config(text=lang_manager.get("button_open_output_dir"))
 
-    # ---- NEW: Method to handle AI prompt optimization ----
     def _threaded_optimize_prompt(self, original_prompt: str):
         try:
             file_logger.info(f"Threaded prompt optimization started for: '{original_prompt[:50]}...'")
-            # Use a specific model or the default one. Consider a faster/cheaper model for this.
-            # For now, using the general default model.
             model_to_use = OPENAI_MODEL_NAME_EFFECTIVE
             full_system_prompt = SYSTEM_PROMPT_OPTIMIZE_TASK
             api_key = OPENAI_API_KEY_EFFECTIVE
@@ -682,12 +691,10 @@ class AgentApp:
             return
 
         self.optimize_prompt_button.config(state='disabled')
-        self.log_message_to_gui("gui_log_optimizing_prompt", level="INFO_GUI")
-        self.root.update_idletasks()  # Ensure UI updates immediately
+        self.log_message_to_gui("gui_log_optimizing_prompt", level="IMPORTANT_GUI")  # Will be blue & bold
+        self.root.update_idletasks()
 
         threading.Thread(target=self._threaded_optimize_prompt, args=(current_prompt,), daemon=True).start()
-
-    # ---- END NEW ----
 
     def show_openai_config_dialog(self):
         dialog = OpenAIConfigDialog(self.root)
@@ -744,12 +751,12 @@ class AgentApp:
                 parent=self.root
         ):
             file_logger.warning("--- User initiated FORCE EXIT. Application will terminate immediately. ---")
-            self.log_message_to_gui("gui_log_force_exit_initiated", level="WARNING_GUI")
+            self.log_message_to_gui("gui_log_force_exit_initiated", level="WARNING_GUI")  # Orange
             self.root.destroy()
             sys.exit(0)
         else:
             file_logger.info("User cancelled force exit.")
-            self.log_message_to_gui("gui_log_force_exit_cancelled", level="INFO_GUI")
+            self.log_message_to_gui("gui_log_force_exit_cancelled", level="INFO_GUI")  # Black
 
     def on_browser_choice_changed(self):
         self.update_browser_path_state()
@@ -807,7 +814,7 @@ class AgentApp:
         file_logger.info("--- Application restart sequence initiated by user for browser setting change. ---")
 
         if self.agent_thread and self.agent_thread.is_alive():
-            self.log_message_to_gui("gui_log_restart_requested_stopping_agent", level="IMPORTANT_GUI")
+            self.log_message_to_gui("gui_log_restart_requested_stopping_agent", level="IMPORTANT_GUI")  # Blue & bold
             file_logger.warning("GUI: Restart requested while agent running. Signaling agent stop.")
             self.stop_event.set()
         try:
@@ -847,12 +854,26 @@ class AgentApp:
             if kwargs:
                 try:
                     message = message.format(**kwargs)
-                except:  # pylint: disable=bare-except
+                except Exception:  # pylint: disable=bare-except
                     pass
 
         display_message = f"{datetime.now().strftime('%H:%M:%S')} - {message}"
+
+        tag_to_apply = None
+        level_config = self.LOG_LEVEL_CONFIG.get(level.upper())
+        if level_config:
+            tag_to_apply = level_config["tag"]
+        else:  # Fallback for unknown levels
+            tag_to_apply = self.LOG_LEVEL_CONFIG["INFO_GUI"]["tag"]
+
         self.log_text.configure(state='normal')
-        self.log_text.insert(tk.END, display_message + "\n")
+        # Example: If you wanted to style only parts, you'd split here
+        # self.log_text.insert(tk.END, f"{datetime.now().strftime('%H:%M:%S')} - ", ("timestamp",))
+        # self.log_text.insert(tk.END, message + "\n", (tag_to_apply,))
+        if tag_to_apply:
+            self.log_text.insert(tk.END, display_message + "\n", (tag_to_apply,))
+        else:  # Should not happen with fallback, but as a safeguard
+            self.log_text.insert(tk.END, display_message + "\n")
         self.log_text.configure(state='disabled')
         self.log_text.see(tk.END)
 
@@ -1028,12 +1049,12 @@ class AgentApp:
                                               filetypes=((txt_desc, "*.txt"), (all_desc, "*.*")), parent=self.root)
         if filepath:
             try:
-                # FIX 2: Correct encoding name from 'utf-f8-sig' to 'utf-8-sig'
-                with open(filepath, 'r', encoding='utf-8-sig') as f:
+                with open(filepath, 'r', encoding='utf-8-sig') as f:  # Corrected from 'utf-f8-sig'
                     content = f.read()
                 self.task_text.delete("1.0", tk.END);
                 self.task_text.insert("1.0", content)
-                self.log_message_to_gui("gui_log_template_loaded", filename=os.path.basename(filepath))
+                self.log_message_to_gui("gui_log_template_loaded", filename=os.path.basename(filepath),
+                                        level="INFO_GUI")
                 file_logger.info(f"GUI: Task template loaded from '{filepath}'.")
             except Exception as e:
                 messagebox.showerror(lang_manager.get("message_error_title"),
@@ -1055,7 +1076,7 @@ class AgentApp:
             try:
                 with open(filepath, 'w', encoding='utf-8') as f:
                     f.write(current_task_content)
-                self.log_message_to_gui("gui_log_template_saved", filename=os.path.basename(filepath))
+                self.log_message_to_gui("gui_log_template_saved", filename=os.path.basename(filepath), level="INFO_GUI")
                 file_logger.info(f"GUI: Task content saved as template to '{filepath}'.")
                 messagebox.showinfo(lang_manager.get("message_success_title"),
                                     lang_manager.get("msgbox_template_saved_success",
@@ -1080,7 +1101,7 @@ class AgentApp:
             if config_manager.save():
                 INITIAL_TASK_PROMPT = current_task_content
                 msg_success_key = "msgbox_default_task_set_success"
-                self.log_message_to_gui(msg_success_key)
+                self.log_message_to_gui(msg_success_key, level="INFO_GUI")
                 file_logger.info(
                     f"GUI: Default task prompt updated in '{config_manager.config_file_path}'. New default (first 70 chars): '{current_task_content[:70].replace(os.linesep, ' ')}...'")
                 messagebox.showinfo(lang_manager.get("message_success_title"), lang_manager.get(msg_success_key),
@@ -1140,7 +1161,7 @@ class AgentApp:
         self.log_text.configure(state='disabled')
         self.files_listbox.delete(0, tk.END);
         self.saved_files_data.clear()
-        self.log_message_to_gui("agent_task_initializing_log")
+        self.log_message_to_gui("agent_task_initializing_log", level="INFO_GUI")  # Black
 
         current_api_key = OPENAI_API_KEY_EFFECTIVE
         current_base_url = OPENAI_BASE_URL_EFFECTIVE
@@ -1174,14 +1195,14 @@ class AgentApp:
                     f"GUI Action: 'custom' browser selected, but Chrome path is empty or whitespace ('{current_chrome_path_val_from_ui}'). The agent will likely fall back to bundled browser.")
                 current_chrome_path = current_chrome_path_val_from_ui
                 self.log_message_to_gui(lang_manager.get("warning_custom_browser_no_path_selected"),
-                                        level="WARNING_GUI")
+                                        level="WARNING_GUI")  # Orange
             elif not os.path.isfile(current_chrome_path_val_from_ui):
                 file_logger.error(
                     f"GUI Action: 'custom' browser selected, but path '{current_chrome_path_val_from_ui}' is not a valid file. Agent might fail or fallback.")
                 current_chrome_path = current_chrome_path_val_from_ui
                 self.log_message_to_gui(
                     lang_manager.get("error_custom_chrome_path_not_file", path=current_chrome_path_val_from_ui),
-                    level="ERROR_GUI")
+                    level="ERROR_GUI")  # Red & bold
             else:
                 current_chrome_path = current_chrome_path_val_from_ui
                 file_logger.info(f"GUI Action: 'custom' browser selected with valid path: '{current_chrome_path}'")
@@ -1208,7 +1229,7 @@ class AgentApp:
                 self.log_message_to_gui(
                     lang_manager.get("warning_gui_could_not_ensure_udd", user_data_dir=current_browser_user_data_dir,
                                      error=e_mkdir_gui_udd),
-                    level="WARNING_GUI")
+                    level="WARNING_GUI")  # Orange
                 file_logger.warning(
                     f"GUI: Could not ensure user data directory '{current_browser_user_data_dir}': {e_mkdir_gui_udd}")
 
@@ -1228,25 +1249,24 @@ class AgentApp:
 
     def request_stop_agent_task(self):
         if self.agent_thread and self.agent_thread.is_alive():
-            self.log_message_to_gui("gui_log_agent_stop_requested", level="WARNING_GUI")
+            self.log_message_to_gui("gui_log_agent_stop_requested", level="WARNING_GUI")  # Orange
             file_logger.warning("GUI: User requested agent stop.")
             self.stop_event.set()
             self.stop_button.config(state='disabled')
-            # Optimize button remains disabled until task fully completes/stops
         else:
             is_running = self.agent_thread and self.agent_thread.is_alive()
             if not is_running and self.stop_button['state'] == 'normal':
-                self.log_message_to_gui("gui_log_agent_stop_ignored_not_running", level="INFO_GUI")
+                self.log_message_to_gui("gui_log_agent_stop_ignored_not_running", level="INFO_GUI")  # Black
                 file_logger.info(f"GUI: Stop request ignored as agent is not running. Resetting button states.")
                 self.run_button.config(state='normal')
                 self.stop_button.config(state='disabled')
                 self.force_exit_button.config(state='normal')
                 self.optimize_prompt_button.config(state='normal')
             elif not is_running:
-                self.log_message_to_gui("gui_log_agent_already_stopped", level="INFO_GUI")
+                self.log_message_to_gui("gui_log_agent_already_stopped", level="INFO_GUI")  # Black
                 file_logger.info(f"GUI: Agent is not currently running or already stopped.")
                 self.force_exit_button.config(state='normal')
-                self.optimize_prompt_button.config(state='normal')
+                self.optimize_prompt_button.config(state='normal')  # Re-enable here too
 
     def on_closing(self):
         file_logger.info("--- GUI: Application closing sequence initiated. ---")
@@ -1254,7 +1274,7 @@ class AgentApp:
             if messagebox.askokcancel(lang_manager.get("message_quit_title"),
                                       lang_manager.get("confirm_quit_agent_running_message"),
                                       parent=self.root):
-                self.log_message_to_gui("gui_log_quit_requested_stopping_agent", level="IMPORTANT_GUI")
+                self.log_message_to_gui("gui_log_quit_requested_stopping_agent", level="IMPORTANT_GUI")  # Blue & bold
                 file_logger.warning("GUI: Quit confirmed by user while agent running. Signaling agent stop.")
                 self.stop_event.set()
                 file_logger.info("GUI: Proceeding with destroy after signaling stop to running agent.")
@@ -1290,7 +1310,6 @@ class AgentApp:
                                                     error_msg=str(e)[:100])
             gui_feedback_queue.put({"type": "log", "message": critical_msg_summary, "level": "ERROR_GUI", "kwargs": {}})
             file_logger.critical(f"CRITICAL ERROR in run_async_task_in_thread's run_until_complete: {e}\n{tb_str}")
-            # FIX 1 Cont: Make sure "error" key is sent
             gui_feedback_queue.put({"type": "task_complete", "stopped_by_user": stop_event_ref.is_set(), "error": True})
         finally:
             try:
@@ -1300,7 +1319,7 @@ class AgentApp:
                     file_logger.debug(f"Async thread: Cancelling {len(pending)} pending asyncio tasks.")
                     for t_item in pending: t_item.cancel()
                     loop.run_until_complete(asyncio.gather(*pending, return_exceptions=True))
-                loop.run_until_complete(asyncio.sleep(0.1))  # type: ignore[arg-type]
+                loop.run_until_complete(asyncio.sleep(0.1))
                 gc.collect()
             except RuntimeError as e_runtime:
                 file_logger.error(f"Async thread: Runtime error during task cleanup in event loop: {e_runtime}")
@@ -1319,7 +1338,7 @@ class AgentApp:
                 message_item = gui_feedback_queue.get_nowait()
                 msg_type = message_item.get("type")
                 msg_content_key_or_direct = message_item.get("message", "")
-                msg_level = message_item.get("level", "INFO_GUI").upper()
+                msg_level = message_item.get("level", "INFO_GUI").upper()  # Ensure uppercase for dict lookup
                 msg_kwargs = message_item.get("kwargs", {})
 
                 processed_message = ""
@@ -1336,17 +1355,17 @@ class AgentApp:
                             pass
 
                 log_prefix_queue = f"Q->GUI ({msg_level})"
+                # Standard file logging (no color here, just severity)
                 if "ERROR" in msg_level:
                     file_logger.error(f"{log_prefix_queue}: {processed_message}")
                 elif "WARNING" in msg_level:
                     file_logger.warning(f"{log_prefix_queue}: {processed_message}")
-                elif msg_type == "log":
+                elif msg_type == "log" or msg_type == "prompt_optimization_result":  # Log other relevant types too
                     file_logger.info(f"{log_prefix_queue}: {processed_message}")
 
                 if msg_type == "log":
-                    gui_display_levels = ["INFO_GUI", "ACTION_GUI", "WARNING_GUI", "ERROR_GUI", "IMPORTANT_GUI"]
-                    if msg_level in gui_display_levels:
-                        self.log_message_to_gui(processed_message, level=msg_level)
+                    # Let log_message_to_gui handle the display with its defined levels
+                    self.log_message_to_gui(processed_message, level=msg_level)
                 elif msg_type == "file_saved":
                     self.add_saved_file_to_list(message_item["path"])
                 elif msg_type == "prompt_optimization_result":
@@ -1355,13 +1374,13 @@ class AgentApp:
                         optimized_prompt = message_item["optimized_prompt"]
                         self.task_text.delete("1.0", tk.END)
                         self.task_text.insert("1.0", optimized_prompt)
-                        self.log_message_to_gui("gui_log_prompt_optimized_success", level="INFO_GUI")
+                        self.log_message_to_gui("gui_log_prompt_optimized_success", level="INFO_GUI")  # Black
                         messagebox.showinfo(lang_manager.get("message_success_title"),
                                             lang_manager.get("gui_log_prompt_optimized_success"), parent=self.root)
                     else:
                         error_msg = message_item["error_message"]
                         self.log_message_to_gui("gui_log_prompt_optimization_failed", error=error_msg,
-                                                level="ERROR_GUI")
+                                                level="ERROR_GUI")  # Red & bold
                         messagebox.showerror(lang_manager.get("message_error_title"),
                                              lang_manager.get("gui_log_prompt_optimization_failed", error=error_msg),
                                              parent=self.root)
@@ -1372,26 +1391,26 @@ class AgentApp:
                     self.optimize_prompt_button.config(state='normal')
 
                     stopped_by_user = message_item.get("stopped_by_user", False)
-                    # FIX 1 Cont.: Check for "error" key specifically.
                     had_critical_error = message_item.get("error", False)
 
                     title_key = "message_info_title"
                     completion_msg_key_gui = "msgbox_agent_task_complete"
-                    log_level_for_gui_msg = "INFO_GUI"
+                    log_level_for_gui_msg = "INFO_GUI"  # Black for success message by default
 
                     if had_critical_error:
                         title_key = "message_error_title"
                         completion_msg_key_gui = "msgbox_agent_task_critical_error"
-                        log_level_for_gui_msg = "ERROR_GUI"
+                        log_level_for_gui_msg = "ERROR_GUI"  # Red & bold for error
                         messagebox.showerror(lang_manager.get(title_key), lang_manager.get(completion_msg_key_gui),
                                              parent=self.root)
                     elif stopped_by_user:
                         title_key = "message_warning_title"
                         completion_msg_key_gui = "msgbox_agent_task_stopped_by_user"
-                        log_level_for_gui_msg = "WARNING_GUI"
+                        log_level_for_gui_msg = "WARNING_GUI"  # Orange for stopped by user
                         messagebox.showwarning(lang_manager.get(title_key), lang_manager.get(completion_msg_key_gui),
                                                parent=self.root)
                     else:  # Successful completion without user stop
+                        log_level_for_gui_msg = "IMPORTANT_GUI"  # Blue & bold for success
                         messagebox.showinfo(lang_manager.get(title_key), lang_manager.get(completion_msg_key_gui),
                                             parent=self.root)
 
@@ -1403,9 +1422,12 @@ class AgentApp:
             pass
         except Exception as e_queue:
             error_msg = f"Error in process_gui_queue: {type(e_queue).__name__} - {e_queue}"
-            self.log_message_to_gui(error_msg, level="ERROR_GUI")  # Log to GUI if possible
-            file_logger.critical(f"{error_msg}\n{traceback.format_exc()}")  # Definitely log to file
-            # Attempt to reset buttons to a safe state if GUI queue processing itself fails catastrophically
+            # Attempt to log to GUI with error styling if log_message_to_gui is still working
+            try:
+                self.log_message_to_gui(error_msg, level="ERROR_GUI")
+            except Exception:  # If GUI logging itself is broken, just pass
+                pass
+            file_logger.critical(f"{error_msg}\n{traceback.format_exc()}")
             try:
                 if self.run_button and self.run_button.winfo_exists(): self.run_button.config(state='normal')
                 if self.stop_button and self.stop_button.winfo_exists(): self.stop_button.config(state='disabled')
@@ -1482,9 +1504,8 @@ if __name__ == "__main__":
     print("-" * 30 + " Initial Configuration " + "-" * 30)
     for line in console_output:
         print(line)
-        if "API Key Loaded" not in line:  # Avoid double logging API key status here
+        if "API Key Loaded" not in line:
             file_logger.info(line)
-    # Log API key status to file once, clearly
     file_logger.info(
         f"Initial Effective Config - OpenAI API Key Loaded: {status_yes_custom_loc if OPENAI_API_KEY_EFFECTIVE and OPENAI_API_KEY_EFFECTIVE != DEFAULT_OPENAI_API_KEY else status_default_loc}")
 
@@ -1498,19 +1519,15 @@ if __name__ == "__main__":
         file_logger.info("Application terminated by KeyboardInterrupt.")
         print("\nApplication terminated by user.")
     finally:
-        if app and hasattr(app, 'root') and app.root.winfo_exists():  # Check if app and its root window exist
+        if app and hasattr(app, 'root') and app.root.winfo_exists():
             file_logger.info("Mainloop exited, attempting final settings save if not already handled by on_closing.")
             app.save_app_settings_to_config(force_save_browser_choice=False)
 
-        logging.shutdown()  # Flush and close all handlers
+        logging.shutdown()
         file_logger.info("==================== Application Exited ====================")
-        # Ensure the file handler is explicitly closed if it was the last one for file_logger
-        # Note: logging.shutdown() should handle this, but explicit close can be a safeguard
-        for handler in list(file_logger.handlers):  # Iterate over a copy as handlers might be removed
+        for handler in list(file_logger.handlers):
             if isinstance(handler, logging.FileHandler):
                 try:
                     handler.close()
-                    # Optionally remove handler from logger if shutdown didn't.
-                    # file_logger.removeHandler(handler) # Usually not needed after shutdown
                 except Exception as e_close:
                     print(f"Error closing file handler during final shutdown: {e_close}", file=sys.stderr)
