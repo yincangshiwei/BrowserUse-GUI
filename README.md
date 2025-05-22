@@ -43,6 +43,8 @@
 
 > 5. 支持输出文件：将自动化操作的文件都输出到一个目录里
 
+> 6. 支持AI优化输入指令
+
 ### 客户端基础功能
 
 > 1. 支持在客户端配置openai
@@ -141,6 +143,9 @@
 
 ```
 BrowserUse/
+├── AISystemPrompt.py
+├── LogTool.py
+├── tool.py
 ├── actions.py
 ├── ConfigTool.py
 ├── OpenAITool.py
@@ -160,6 +165,9 @@ BrowserUse/
 ```
 
 架构介绍：
+- `AISystemPrompt.py`: 系统提示词定义。
+- `LogTool.py`: 日志工具。
+- `tool.py`: 工具集。
 - `actions.py`: AI能力扩展action实现。
 - `OpenAiTool`: openAI对接工具实现。
 - `ConfigTool.py`: config.ini文件配置管理工具。

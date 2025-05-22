@@ -44,6 +44,8 @@ I have created a separate client and expanded some features. For details, see th
 
 > 5. Output Files: Outputs all automated operation files to one directory.
 
+> 6. Support AI optimization of input instructions
+
 ### Basic Features of the Client
 
 > 1. Configure OpenAI within the client
@@ -142,6 +144,9 @@ I have created a separate client and expanded some features. For details, see th
 
 ```
 BrowserUse/
+├── AISystemPrompt.py
+├── LogTool.py
+├── tool.py
 ├── actions.py
 ├── ConfigTool.py
 ├── OpenAITool.py
@@ -160,6 +165,9 @@ BrowserUse/
 
 ```
 Architecture Overview:
+- `AISystemPrompt.py`: Definition of system prompt words.
+- `LogTool.py`: A logging tool.
+- `tool.py`: toolset.
 - `actions.py`: Implementation of extended AI capabilities.
 - `OpenAiTool`: Implementation of tools for interfacing with OpenAI.
 - `ConfigTool.py`: Tool for managing the config.ini file.
