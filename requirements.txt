@@ -13,6 +13,7 @@ cffi==1.17.1
 charset-normalizer==3.4.2
 click==8.2.0
 colorama==0.4.6
+colorlog==6.9.0
 cryptography==44.0.3
 cx_Freeze==8.3.0
 cx_Logging==3.2.1
