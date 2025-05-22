@@ -1,5 +1,6 @@
 from cx_Freeze import setup, Executable
 import os
+from main import USER_TYPE
 # 收集静态文件并保留目录结构
 data_files = ['config.ini']
 resources_dir = './resources'  # 静态资源目录
@@ -34,10 +35,10 @@ for root, dirs, files in os.walk(resources_dir, topdown=True):
         data_files.append((source_path, destination_path))
 print(data_files)
 
-
+name = "PBrowserUse" if USER_TYPE=="Personal" else "EBrowserUse"
 
 executables = [
-    Executable("main.py", base='Win32GUI', target_name="BrowserUse.exe")  # GUI 应用需指定 base
+    Executable("main.py", base='Win32GUI', target_name=f"{name}.exe")  # GUI 应用需指定 base
 ]
 
 # 设置默认安装目录
@@ -48,11 +49,11 @@ build_exe_options = {
 
 bdist_msi_options = {
     "upgrade_code": "{c1f7238b-4b60-41d6-bfdf-0965418395c6}",  # 替换为你生成的 GUID
-    "initial_target_dir": r"[ProgramFilesFolder]\BrowserUse"  # 默认安装目录
+    "initial_target_dir": r"[ProgramFilesFolder]\{name}"  # 默认安装目录
 }
 
 setup(
-    name="YHBrowserUse",
+    name="{name}",
     version="1.0",
     description="BrowserUse客户端",
     options={
