@@ -9,7 +9,6 @@ import threading
 import queue  # For thread-safe communication
 import platform  # For opening file explorer
 import subprocess  # For opening file explorer
-import logging  # For file logging
 from datetime import datetime  # For timestamping GUI messages
 
 # --- Tkinter specific imports ---
