@@ -44,16 +44,17 @@ executables = [
 # 设置默认安装目录
 build_exe_options = {
     "zip_include_packages": [],
-    "include_files": data_files
+    "include_files": data_files,
+    "includes": ["pydantic.deprecated", "pydantic.deprecated.decorator"]
 }
 
 bdist_msi_options = {
     "upgrade_code": "{c1f7238b-4b60-41d6-bfdf-0965418395c6}",  # 替换为你生成的 GUID
-    "initial_target_dir": r"[ProgramFilesFolder]\{name}"  # 默认安装目录
+    "initial_target_dir": rf"[ProgramFilesFolder]\{name}"  # 默认安装目录
 }
 
 setup(
-    name="{name}",
+    name=f"{name}",
     version="1.0",
     description="BrowserUse客户端",
     options={
