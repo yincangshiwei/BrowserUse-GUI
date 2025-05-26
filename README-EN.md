@@ -215,4 +215,12 @@ python setup.py build
 2. Modify USER_TYPE to Enterprise and ENTERPRISE_NETWORK_CHECK_HOST and ENTERPRISE_NETWORK_CHECK_PORT to the IP and port of your enterprise service in main.py.
 ```
 
+## Problem Handling
+
+### Question 1：ImportError: DLL load failed while importing aggregations
+
+> Missing Microsoft Visual C++Redistributable
+
+> Install or repair VC runtime library：https://aka.ms/vs/17/release/vc_redist.x64.exe?spm=a2ty_o01.29997173.0.0.77e1c921kBdzS5&file=vc_redist.x64.exe
+
 ---

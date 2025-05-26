@@ -216,4 +216,12 @@ python setup.py build
 2. 在main.py里面修改USER_TYPE为Enterprise，ENTERPRISE_NETWORK_CHECK_HOST和ENTERPRISE_NETWORK_CHECK_PORT改为企业服务的IP和端口。
 ```
 
+## 问题处理
+
+### 问题1：ImportError: DLL load failed while importing aggregations: 找不到指定的模块。
+
+> 缺少 Microsoft Visual C++ Redistributable
+
+> 安装或修复 VC 运行库：https://aka.ms/vs/17/release/vc_redist.x64.exe?spm=a2ty_o01.29997173.0.0.77e1c921kBdzS5&file=vc_redist.x64.exe
+
 ---
