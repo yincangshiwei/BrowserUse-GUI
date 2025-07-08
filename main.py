@@ -1,5 +1,11 @@
 # main.py
-from langchain_openai import ChatOpenAI
+import os
+
+from browser_use.llm import BaseChatModel
+# Set python's default encoding to utf-8
+# This is to fix the issue with the browser_use library not specifying encoding when reading files
+
+from browser_use.llm import ChatOpenAI
 from browser_use import Agent, Browser, BrowserConfig, Controller  # Assuming BrowserConfig handles new args
 import asyncio
 import os
@@ -16,6 +22,8 @@ from datetime import datetime  # For timestamping GUI messages
 # --- Tkinter specific imports ---
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox, scrolledtext, Menu, font as tkFont  # Added tkFont
+
+from pydantic import SecretStr
 
 # ----------- Action 相关代码全部在 action.py -------------
 from actions import register_actions, extend_system_message
@@ -131,9 +139,7 @@ async def run_agent_async(task_text, openai_api_key, openai_base_url, openai_mod
 
         log_to_gui("agent_log_output_dir_set", abs_output_dir=abs_output_dir)
         file_logger.info(f"Output directory: {abs_output_dir}")
-
-        llm = ChatOpenAI(model=openai_model_name, openai_api_base=openai_base_url, openai_api_key=openai_api_key)
-
+        llm = ChatOpenAI(model=openai_model_name, base_url=openai_base_url, api_key=openai_api_key)
         if stop_event.is_set():
             log_to_gui("agent_log_cancelled_before_browser", "WARNING_GUI")
             file_logger.warning("Agent run cancelled before browser setup (due to stop request)")
@@ -231,7 +237,8 @@ async def run_agent_async(task_text, openai_api_key, openai_base_url, openai_mod
             llm=llm,
             browser=browser_instance,
             controller=controller,
-            message_context=extend_system_message,
+            extend_system_message=extend_system_message,
+            override_system_message=SYSTEM_PROMPT_OPTIMIZE_TASK,
             use_vision=use_vision_param,
             generate_gif=True
         )
